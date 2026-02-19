@@ -207,11 +207,14 @@ function App() {
 
         {gameStarted && !winner && (
           <>
+          
+            {/* 
             <Leaderboard
               players={allPlayers}
               currentTurnId={currentTurnId}
               winLimit={10} // GYŐZELEMHEZ SZÜKSÉGES SZÁM, EZT A SZERVER OLDALÁN IS BE KELL ÁLLÍTANI
-            />
+            /> 
+            */}
 
             <GameBoard
               allPlayers={allPlayers}
