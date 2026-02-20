@@ -20,4 +20,5 @@ export interface Room {
   turnIndex: number;
   turnLocked: boolean;
   activeCard?: Song;
+  targetLength: number;
 }

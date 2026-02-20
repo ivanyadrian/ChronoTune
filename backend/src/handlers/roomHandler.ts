@@ -5,12 +5,13 @@ import { hungarianSongs } from "../data/songs.js";
 export const registerRoomHandlers = (io: Server, socket: Socket, roomsData: Record<string, Room>,) => {
  
   // Szoba létrehozása
-  socket.on("create_room", async (data: { userName: string }) => {
+  socket.on("create_room", async (data: { userName: string, targetLength: number }) => {
     const code = Math.random().toString(36).substring(2, 6).toUpperCase();
     socket.join(code);
 
     roomsData[code] = {
       players: [{ id: socket.id, name: data.userName, timeline: [] }],
+      targetLength: data.targetLength || 10,
       deck: [],
       gameStarted: false,
       turnIndex: 0,

@@ -14,7 +14,10 @@ const socket: Socket = io("http://localhost:3001");
 function App() {
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [inputCode, setInputCode] = useState("");
+
   const [userName, setUserName] = useState("");
+  const [targetLength, setTargetLength] = useState(10);
+  
   const [error, setError] = useState("");
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [gameStarted, setGameStarted] = useState(false);
@@ -47,6 +50,7 @@ function App() {
     socket.on("disconnect", () => setIsConnected(false));
 
     socket.on("room_created", (code: string) => setRoomCode(code));
+
     socket.on("joined_success", (code: string) => {
       setRoomCode(code);
       setError("");
@@ -146,7 +150,7 @@ function App() {
       setError("Adj meg egy nevet!");
       return;
     }
-    socket.emit("create_room", { userName });
+    socket.emit("create_room", { userName, targetLength });
   };
 
   const handleJoinRoom = () => {
@@ -193,6 +197,8 @@ function App() {
             inputCode={inputCode}
             setInputCode={setInputCode}
             error={error}
+            targetLength={targetLength}
+            setTargetLength={setTargetLength}
           />
         )}
 

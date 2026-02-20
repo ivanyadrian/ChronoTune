@@ -6,6 +6,7 @@ export const registerGameHandlers = (
   socket: Socket,
   roomsData: Record<string, Room>,
 ) => {
+
   socket.on("draw_card", (roomCode: string) => {
     const room = roomsData[roomCode];
     if (!room || !room.gameStarted) return;
@@ -29,7 +30,7 @@ export const registerGameHandlers = (
 
   socket.on(
     "place_card",
-    (data: { roomCode: string; cardId: string; index: number }) => {
+    (data: { roomCode: string; cardId: number; index: number }) => {
       const room = roomsData[data.roomCode];
       if (!room || socket.id !== room.players[room.turnIndex].id) return;
 
@@ -52,7 +53,7 @@ export const registerGameHandlers = (
 
       if (isCorrect) {
         player.timeline.splice(data.index, 0, fullCard);
-        if (player.timeline.length >= 3) {
+        if (player.timeline.length >= room.targetLength) {
           io.to(data.roomCode).emit("game_over", {
             winnerName: player.name,
             finalTimeline: player.timeline,
