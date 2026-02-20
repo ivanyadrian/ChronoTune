@@ -1,11 +1,7 @@
-import { useState, useEffect } from "react";
-import YouTube from "react-youtube";
+import { useState } from "react"; // Ne felejtsd el importálni!
 import type { Player, Card } from "../types";
 import { SongCard } from "../components/SongCard";
-import { Play, Pause } from "lucide-react";
-import { AudioVisualizer } from "../components/AudioVisualizer";
-
-const YouTubePlayer = YouTube as any;
+import { MusicPlayer } from "../components/MusicPlayer";
 
 interface GameBoardProps {
   allPlayers: Player[];
@@ -28,14 +24,9 @@ export const GameBoard = ({
   const [player, setPlayer] = useState<any>(null);
   const [playbackState, setPlaybackState] = useState<number>(-1);
 
-  useEffect(() => {
-    setPlaybackState(-1);
-    setPlayer(null);
-  }, [currentCard?.id]);
-
   const handleTogglePlay = () => {
     if (!player) return;
-    if (playbackState === 1) {
+    if (playbackState === 1) { // 1 = YT.PlayerState.PLAYING
       player.pauseVideo();
     } else {
       player.playVideo();
@@ -57,52 +48,15 @@ export const GameBoard = ({
 
       <div className="flex flex-col items-center justify-center min-h-88 border-2 border-dashed border-slate-700 rounded-[3rem] p-6 bg-slate-800/30 backdrop-blur-sm">
         {currentCard ? (
-          <div className="flex flex-col items-center gap-8">
-            <button
-              onClick={handleTogglePlay}
-              className={`w-28 h-28 rounded-full flex items-center justify-center transition-all shadow-2xl active:scale-90 border-4 ${
-                playbackState === 1
-                  ? "bg-red-500 border-red-400 animate-pulse"
-                  : "bg-green-500 border-green-400 hover:scale-110"
-              }`}
-            >
-              {playbackState === 1 ? (
-                <Pause className="w-12 h-12 text-white" />
-              ) : (
-                <Play className="w-12 h-12 text-white" />
-              )}
-            </button>
-
-              {/* Itt az új animált hangsáv */}
-            <AudioVisualizer isPlaying={playbackState === 1} />
-
-            <div className="text-center space-y-4">
-              <p className="text-slate-200 font-black text-xl uppercase tracking-tighter">
-                {playbackState === 1
-                  ? "A dal éppen szól..."
-                  : "Kattints a lejátszáshoz!"}
-              </p>
-            </div>
-
-            {/* A lejátszó most már láthatatlan marad */}
-            <div className="pointer-events-none absolute opacity-0">
-              <YouTubePlayer
-                videoId={currentCard.youtubeId}
-                onReady={(e: any) => setPlayer(e.target)}
-                onStateChange={(e: any) => setPlaybackState(e.data)}
-                opts={{
-                  height: "0",
-                  width: "0",
-                  playerVars: {
-                    autoplay: 0,
-                    controls: 0,
-                    start: 40,
-                    origin: window.location.origin,
-                  },
-                }}
-              />
-            </div>
-          </div>
+          
+          <MusicPlayer 
+            currentCard={currentCard}
+            player={player}
+            setPlayer={setPlayer}
+            playbackState={playbackState}
+            setPlaybackState={setPlaybackState}
+            handleTogglePlay={handleTogglePlay}
+          />
         ) : (
           currentTurnId === socketId && (
             <button
