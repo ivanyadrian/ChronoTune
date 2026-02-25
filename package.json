@@ -1,9 +1,13 @@
 {
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "axios": "^1.13.5",
     "dotenv": "^17.3.1",
     "lucide-react": "^0.574.0",
-    "react-youtube": "^10.1.0"
+    "react-youtube": "^10.1.0",
+    "yt-search": "^2.13.1"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
