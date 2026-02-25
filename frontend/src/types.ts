@@ -1,14 +1,17 @@
-export interface Card {
-  id: string;
+export interface Song {
+  id: number;
   title: string;
   artist: string;
   year: number;
-  youtubeId?: string;
-  previewUrl?: string;
+  month: number;
+  day: number;
+  fullDate: string;
+  deezerId: string;
+  cover: string;
 }
 
 export interface Player {
   id: string;
   name: string;
-  timeline: Card[];
+  timeline: Song[];
 }
