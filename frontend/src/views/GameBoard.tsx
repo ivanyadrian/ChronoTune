@@ -1,5 +1,5 @@
-import { useState } from "react"; // Ne felejtsd el importálni!
-import type { Player, Card } from "../types";
+import { useState } from "react";
+import type { Player, Song } from "../types";
 import { SongCard } from "../components/SongCard";
 import { MusicPlayer } from "../components/MusicPlayer";
 
@@ -7,7 +7,7 @@ interface GameBoardProps {
   allPlayers: Player[];
   currentTurnId: string | null;
   socketId: string;
-  currentCard: Card | null;
+  currentSong: Song | null;
   drawCard: () => void;
   onPlaceCard: (index: number) => void;
 }
@@ -16,21 +16,15 @@ export const GameBoard = ({
   allPlayers,
   currentTurnId,
   socketId,
-  currentCard,
+  currentSong,
   drawCard,
   onPlaceCard,
 }: GameBoardProps) => {
   const activePlayer = allPlayers.find((p) => p.id === currentTurnId);
-  const [player, setPlayer] = useState<any>(null);
   const [playbackState, setPlaybackState] = useState<number>(-1);
 
   const handleTogglePlay = () => {
-    if (!player) return;
-    if (playbackState === 1) { // 1 = YT.PlayerState.PLAYING
-      player.pauseVideo();
-    } else {
-      player.playVideo();
-    }
+    setPlaybackState((prev) => (prev === 1 ? 0 : 1));
   };
 
   return (
@@ -47,18 +41,15 @@ export const GameBoard = ({
       </div>
 
       <div className="flex flex-col items-center justify-center min-h-88 border-2 border-dashed border-slate-700 rounded-[3rem] p-6 bg-slate-800/30 backdrop-blur-sm">
-        {currentCard ? (
-          
-          <MusicPlayer 
-            currentCard={currentCard}
-            player={player}
-            setPlayer={setPlayer}
+        {currentSong && currentSong.deezerId ? (
+          <MusicPlayer
+            currentSong={currentSong}
             playbackState={playbackState}
             setPlaybackState={setPlaybackState}
             handleTogglePlay={handleTogglePlay}
           />
         ) : (
-          currentTurnId === socketId && (
+          currentTurnId === socketId && !currentSong && (
             <button
               onClick={drawCard}
               className="bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-6 px-12 rounded-2xl animate-bounce"
@@ -66,6 +57,10 @@ export const GameBoard = ({
               🎵 ÚJ DAL HÚZÁSA
             </button>
           )
+        )}
+
+        {currentSong && !currentSong.deezerId && (
+          <div className="text-red-400 font-bold">Error: Song data (Deezer ID) missing.</div>
         )}
       </div>
 
@@ -75,7 +70,7 @@ export const GameBoard = ({
             {Array.from({ length: activePlayer.timeline.length + 1 }).map(
               (_, i) => (
                 <div key={`slot-${i}`} className="flex items-center gap-6">
-                  {currentCard && currentTurnId === socketId && (
+                  {currentSong && currentTurnId === socketId && (
                     <button
                       onClick={() => onPlaceCard(i)}
                       className="w-14 h-14 rounded-full bg-yellow-500 text-slate-900 font-black text-3xl border-4 border-slate-900"
@@ -84,7 +79,7 @@ export const GameBoard = ({
                     </button>
                   )}
                   {i < activePlayer.timeline.length && (
-                    <SongCard card={activePlayer.timeline[i]} showYear={true} />
+                    <SongCard song={activePlayer.timeline[i]} showYear={true} />
                   )}
                 </div>
               ),
