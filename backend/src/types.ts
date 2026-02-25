@@ -1,16 +1,20 @@
 export interface Song {
   id: number;
+  deezerId: string;
   title: string;
   artist: string;
   year: number;
-  youtubeId?: string;
-  rawTitle?: string;
+  month: number;
+  day: number;
+  fullDate: string;
+  cover: string;
 }
 
 export interface Player {
   id: string;
   name: string;
   timeline: Song[];
+  mistakes: number; 
 }
 
 export interface Room {
