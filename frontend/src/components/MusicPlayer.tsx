@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Volume2 } from 'lucide-react';
 
-export const MusicPlayer = ({ currentSong, handleTogglePlay, playbackState, setPlaybackState }: any) => {
+export const MusicPlayer = ({ currentSong, handleTogglePlay, playbackState, setPlaybackState, onCardMouseDown, isDraggable }: any) => {
   const [progress, setProgress] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -87,7 +87,11 @@ export const MusicPlayer = ({ currentSong, handleTogglePlay, playbackState, setP
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-sm mx-auto">
+    <div
+      className="flex flex-col items-center w-full max-w-sm mx-auto"
+      onMouseDown={onCardMouseDown}
+      style={{ cursor: isDraggable ? 'grab' : 'default', userSelect: 'none' }}
+    >
       <div className="w-full bg-slate-900/90 backdrop-blur-2xl rounded-[3rem] p-6 shadow-2xl border border-white/10 space-y-6">
 
         <div className="relative aspect-square rounded-4xl overflow-hidden group shadow-2xl bg-black">
@@ -99,6 +103,7 @@ export const MusicPlayer = ({ currentSong, handleTogglePlay, playbackState, setP
 
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <button
+              onMouseDown={(e) => e.stopPropagation()}
               onClick={handleTogglePlay}
               disabled={!isReady}
               className={`w-20 h-20 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95 ${!isReady ? 'cursor-not-allowed opacity-50' : 'hover:scale-110'}`}
@@ -131,6 +136,7 @@ export const MusicPlayer = ({ currentSong, handleTogglePlay, playbackState, setP
         <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-2xl">
           <Volume2 size={18} className="text-slate-400 shrink-0" />
           <input
+            onMouseDown={(e) => e.stopPropagation()}
             type="range" min="0" max="100" value={volume} onChange={handleVolumeChange}
             className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-yellow-500"
           />
