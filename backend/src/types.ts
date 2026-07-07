@@ -14,15 +14,25 @@ export interface Player {
   id: string;
   name: string;
   timeline: Song[];
-  mistakes: number; 
+  mistakes: number;
+  attempts: number;
+  personalDeck: Song[];
+  score: number;
+  winStreak: number;
+  loseStreak: number;
+  pendingIndex: number | null;
 }
 
 export interface Room {
   players: Player[];
+  targetLength: number;
   deck: Song[];
   gameStarted: boolean;
   turnIndex: number;
   turnLocked: boolean;
+  maxMistakes: number | null;
+  syncMusic: boolean;
   activeCard?: Song;
-  targetLength: number;
+  playbackState: number;
+  currentPlayingDeezerId: string | null;
 }

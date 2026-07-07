@@ -1,0 +1,21 @@
+/* Unique slider button style */
+.custom-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--primary); 
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 15px color-mix(in srgb, var(--primary) 50%, transparent);
+}
+
+.custom-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--primary); 
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #680092;
+  box-shadow: 0 0 15px color-mix(in srgb, var(--primary) 50%, transparent);
+}

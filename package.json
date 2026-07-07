@@ -5,6 +5,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "axios": "^1.13.5",
     "dotenv": "^17.3.1",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.574.0",
     "react-youtube": "^10.1.0",
     "yt-search": "^2.13.1"

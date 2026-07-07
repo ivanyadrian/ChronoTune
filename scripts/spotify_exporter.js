@@ -70,7 +70,7 @@ setTimeout(() => {
           // Takarítás
           document.body.style.pointerEvents = "";
           if (scrollbar) scrollbar.style.display = "";
-          console.log(`✅ Sikeresen exportálva: ${finalResult.length} dal.`);
+          console.log(`Sikeresen exportálva: ${finalResult.length} dal.`);
         }
       }
     }, 100); // 100ms-onkénti ellenőrzés a stabilitásért

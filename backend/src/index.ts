@@ -2,81 +2,92 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import { registerRoomHandlers } from "./handlers/roomHandler.js";
+import {
+  registerRoomHandlers,
+  handleLeaveRoom,
+} from "./handlers/roomHandler.js";
 import { registerGameHandlers } from "./handlers/gameHandler.js";
 import { Room } from "./types.js";
 
 const app = express();
+const PORT = process.env.PORT || 3001;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 /**
- * CORS (Cross-Origin Resource Sharing) engedélyezése.
- * Ez szükséges ahhoz, hogy a frontend (pl. localhost:5173) 
- * kéréseket küldhessen a backendnek (localhost:3001).
+ * Enable CORS (Cross-Origin Resource Sharing).
+ * This is required so the frontend (e.g. localhost:5173)
+ * can send requests to the backend (localhost:3001).
  */
 app.use(cors());
 
 /**
  * DEEZER PROXY ENDPOINT
- * A böngészők biztonsági okokból (CORS) gyakran blokkolják, ha a frontend 
- * közvetlenül hívja a Deezer API-t. Ez a szerveroldali proxy "átveszi" a kérést, 
- * lekéri az adatot a Deezertől, és továbbítja a kliensnek.
+ * Browsers often block direct API calls from the frontend due to CORS.
+ * This server-side proxy intercepts the request,
+ * fetches the data from Deezer, and forwards it to the client.
  */
-app.get('/api/deezer-proxy/:trackId', async (req, res) => {
+app.get("/api/deezer-proxy/:trackId", async (req, res) => {
   const { trackId } = req.params;
+
+  if (!/^\d+$/.test(trackId)) {
+    return res.status(400).json({ error: "Érvénytelen track ID formátum" });
+  }
 
   try {
     const response = await fetch(`https://api.deezer.com/track/${trackId}`);
-    if (!response.ok) throw new Error('Deezer API hiba');
+
+    if (!response.ok) {
+      console.error(
+        `Deezer API hiba: ${response.status} - ${response.statusText}`,
+      );
+      return res.status(response.status).json({
+        error: "Deezer API hiba",
+        status: response.status,
+      });
+    }
 
     const data = await response.json();
     res.json(data);
   } catch (error) {
     console.error("Proxy hiba:", error);
-    res.status(500).json({ error: 'Nem sikerült elérni a Deezert' });
+    res.status(500).json({ error: "Nem sikerült elérni a Deezert" });
   }
 });
 
-// HTTP szerver létrehozása az Express alkalmazásból
+// Create HTTP server from the Express application
 const httpServer = createServer(app);
 
 /**
- * SOCKET.IO INICIALIZÁLÁSA
- * Itt konfiguráljuk a valós idejű kommunikációt.
- * Fontos: Az origin-t később érdemes lesz környezeti változóra (ENV) cserélni élesítéskor.
+ * INITIALIZE SOCKET.IO
+ * Configure real-time communication here.
+ * Important: The origin should be replaced with an environment variable (ENV) during deployment.
  */
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173", // A frontended címe
+    origin: CORS_ORIGIN,
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
 /**
- * IN-MEMORY ADATBÁZIS
- * Ez tárolja az összes aktív szobát és azok állapotát (pakli, játékosok, kártyák).
- * Figyelem: Szerver újraindításkor ez kiürül (ezt oldjuk majd meg később Redis-szel).
+ * IN-MEMORY DATABASE
+ * Stores all active rooms and their state (deck, players, cards).
+ * Note: This clears on server restart (to be solved later with Redis for persistence).
  */
 const roomsData: Record<string, Room> = {};
 
-// SOCKET ESEMÉNYEK KEZELÉSE
+// HANDLE SOCKET EVENTS
 io.on("connection", (socket) => {
-  console.log("Új kliens kapcsolódott:", socket.id);
-
   /**
-   * ESEMÉNYKEZELŐK REGISZTRÁLÁSA
-   * Szétválasztjuk a szobakezelést (lobby) és a játékmenetet (gameplay) 
+   * REGISTER EVENT HANDLERS
+   * Separate room management (lobby) and gameplay handlers
    */
   registerRoomHandlers(io, socket, roomsData);
   registerGameHandlers(io, socket, roomsData);
-
-  socket.on("disconnect", () => {
-    console.log("Kliens lecsatlakozott:", socket.id);
-  });
 });
 
-// SZERVER INDÍTÁSA
-const PORT = 3001;
+// START SERVER
 httpServer.listen(PORT, () => {
-  console.log(`🚀 Szerver fut a http://localhost:${PORT} címen`);
+  console.log(`Szerver fut a http://localhost:${PORT} címen`);
 });

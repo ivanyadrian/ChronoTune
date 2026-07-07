@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@import "./variables.css";
+
+@theme {
+  /* Connect Tailwind to the CSS variables */
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-secondary-light: var(--secondary-light);
+  --color-bg-dark: var(--bg-dark);
+  --color-surface-dark: var(--surface-dark);
+
+  /* Other non-color configurations will remain here */
+  --font-sekuya: "Sekuya", sans-serif;
+  --text-fluid-h1: clamp(2.2rem, 8vw, 4.5rem);
+  --text-fluid-h2: clamp(1.25rem, 3vw, 1.75rem);
+  --text-fluid-h3: clamp(1.15rem, 2.5vw, 1.5rem);
+  --text-fluid-h4: clamp(1rem, 3vw, 1.25rem);
+  --text-fluid-p: clamp(0.85rem, 1.8vw, 1rem);
+  --text-fluid-badge: clamp(0.65rem, 1.2vw, 0.8rem);
+  --breakpoint-xs: 30rem;
+  --breakpoint-xxs: 20rem;
+}
+
+@tailwind utilities;

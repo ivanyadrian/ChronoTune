@@ -1,34 +1,87 @@
+// src/handlers/gameHandler.ts
 import { Server, Socket } from "socket.io";
-import type { Room } from "../types.js";
+import type { Room, Song } from "../types.js";
 import { shuffle } from "../utils/shuffle.js";
+import  hungarianSongs  from "../data/songs.json" with { type: "json" };
+import { SCORES, PLAYBACK_STATE, ERROR_CODES } from "../constants/index.js";
 
-// A konkrét játékmenet eseményeit (húzás, kártyalehelyezés, körváltás) kezelő modul.
+// Helper function for sending errors
+const emitError = (socket: Socket, code: string, message: string) => {
+  socket.emit("game_error", { code, message, timestamp: Date.now() });
+};
+
+// Helper function for sending messages
+const emitMessage = (socket: Socket, type: string, text: string) => {
+  socket.emit("game_message", { type, text });
+};
+
+const getAuthorizedTurnContext = (
+  socket: Socket,
+  roomCode: string,
+  roomsData: Record<string, Room>,
+) => {
+  const room = roomsData[roomCode];
+  if (!room || !room.gameStarted) {
+    emitError(socket, ERROR_CODES.GAME_NOT_STARTED, "A játek még nem indult el!");
+    return null;
+  }
+
+  const isSocketInRoom = socket.rooms.has(roomCode);
+  const currentPlayer = room.players[room.turnIndex];
+  const isPlayerInRoomState = room.players.some((p) => p.id === socket.id);
+
+  if (!isSocketInRoom || !isPlayerInRoomState || !currentPlayer) {
+    emitError(socket, ERROR_CODES.ROOM_NOT_FOUND, "Nem vagy a szobaban!");
+    return null;
+  }
+
+  if (socket.id !== currentPlayer.id) {
+    emitError(socket, ERROR_CODES.NOT_YOUR_TURN, `${currentPlayer.name} van soron!`);
+    return null;
+  }
+
+  return { room, currentPlayer };
+};
 
 export const registerGameHandlers = (
   io: Server,
   socket: Socket,
   roomsData: Record<string, Room>,
 ) => {
-  
-  // --- KÁRTYAHÚZÁS (DRAW CARD) ---
+
+  // ------------------------ DRAW CARD ------------------------
   socket.on("draw_card", (roomCode: string) => {
-    const room = roomsData[roomCode];
+    try {
+      const context = getAuthorizedTurnContext(socket, roomCode, roomsData);
+      if (!context) return;
 
-    // Ellenőrizzük, hogy létezik-e a szoba és elindult-e már a játék
-    if (!room || !room.gameStarted) return;
+      const { room, currentPlayer } = context;
 
-    // Csak az a játékos húzhat, akinek éppen a köre van
-    const currentPlayer = room.players[room.turnIndex];
-    if (socket.id !== currentPlayer.id) return;
+      if (room.activeCard) {
+        emitError(socket, ERROR_CODES.ALREADY_HAS_ACTIVE_CARD, "Mar huztal egy kartyat! Helyezd el vagy dobd el.");
+        return;
+      }
 
-    // Ha van még kártya a pakliban, kiveszünk egyet
-    if (room.deck.length > 0) {
-      const nextCard = room.deck.pop()!;
+      const pDeck = currentPlayer.personalDeck;
+      if (!pDeck || pDeck.length === 0) {
+        emitError(socket, ERROR_CODES.NO_MORE_CARDS, "Nincs tobb kartya a pakliban!");
+        return;
+      }
 
-      // Eltároljuk a szerveren, mint aktuálisan aktív (húzott) kártyát
+      const nextCard = pDeck.pop();
+      if (!nextCard) {
+        emitError(socket, ERROR_CODES.SERVER_ERROR, "Hiba tortent a kartyahuzas soran");
+        return;
+      }
+
       room.activeCard = nextCard;
+      room.playbackState = PLAYBACK_STATE.STOPPED;
 
-      // Kiküldjük a kártya adatait a dátum kivételével
+      io.to(roomCode).emit("music_playback_toggled", {
+        deezerId: nextCard.deezerId,
+        state: PLAYBACK_STATE.STOPPED,
+      });
+
       io.to(roomCode).emit("new_card_drawn", {
         id: nextCard.id,
         title: nextCard.title,
@@ -36,75 +89,110 @@ export const registerGameHandlers = (
         deezerId: nextCard.deezerId,
         cover: nextCard.cover,
         userName: currentPlayer.name,
+        playerId: currentPlayer.id,
       });
+
+    } catch (error) {
+      console.error("[draw_card] Critical error:", error);
+      emitError(socket, ERROR_CODES.SERVER_ERROR, "Szerver hiba történt a kártyahúzás során");
     }
   });
 
-  //Segédfüggvény: A dátumot egyetlen összehasonlítható számmá alakítja (pl.: 2001310109).
-  const getVal = (c: any) => c.year * 10000 + c.month * 100 + c.day;
+  // ------------------------ PLACE CARD ------------------------
+  socket.on("place_card", (data: { roomCode: string; cardId: number; index: number }) => {
+    let shouldClearCard = false;
+    
+    try {
+      const context = getAuthorizedTurnContext(socket, data.roomCode, roomsData);
+      if (!context) return;
 
+      const { room, currentPlayer } = context;
 
-  // --- KÁRTYA LEHELYEZÉSE (PLACE CARD) ---
-  socket.on(
-    "place_card",
-    (data: { roomCode: string; cardId: number; index: number }) => {
-      const room = roomsData[data.roomCode];
-      
-      // Validáció: Szoba létezik, játék megy, és a megfelelő játékos küldte a kérést
-      if (!room || !room.gameStarted) return;
-      const currentPlayer = room.players[room.turnIndex];
-      if (socket.id !== currentPlayer.id) return;
+      // Validations
+      if (!Number.isInteger(data.index) || data.index < 0 || data.index > currentPlayer.timeline.length) {
+        emitError(socket, ERROR_CODES.INVALID_INDEX, `Érvénytelen pozíció: ${data.index}`);
+        return;
+      }
 
-      // Feloldjuk a kör-zárat, hogy a kliens kérhesse a következő kört a tipp után
-      room.turnLocked = false;
-      
       const fullCard = room.activeCard;
-      // Biztonsági ellenőrzés: A kliens által küldött ID egyezik-e a szerver által tárolt aktív kártyával
-      if (!fullCard || fullCard.id !== data.cardId) return;
+      if (!fullCard) {
+        emitError(socket, ERROR_CODES.NO_ACTIVE_CARD, "Nincs aktiv kártya! Először huzz egyet.");
+        return;
+      }
 
+      if (fullCard.id !== data.cardId) {
+        emitError(socket, ERROR_CODES.CARD_NOT_FOUND, "A kártya ID nem egyezik az aktiv kártyaival!");
+        return;
+      }
+
+      // Clear pending state (notify others)
+      currentPlayer.pendingIndex = null;
+      io.to(data.roomCode).emit("player_pending_updated", {
+        playerId: currentPlayer.id,
+        index: null,
+      });
+
+      // Validation and scoring
       const { timeline } = currentPlayer;
-      const newVal = getVal(fullCard);
+      let delta = 0;
+      let bonusPoints = 0;
       let isCorrect = true;
 
-      // --- ÖSSZEHASONLÍTÁSI LOGIKA ---
-      //Megnézzük, hogy a kiválasztott indexen a kártya a megfelelő helyen van-e
-
-      // 1. Ellenőrzés a bal oldali szomszédhoz (ha nem a legelső helyre tette)
-      if (data.index > 0) {
-        const prevVal = getVal(timeline[data.index - 1]);
-        if (prevVal > newVal) isCorrect = false;
+      // Check if placed in the correct position
+      if (data.index > 0 && timeline[data.index - 1].year > fullCard.year) {
+        isCorrect = false;
+      }
+      if (data.index < timeline.length && timeline[data.index].year < fullCard.year) {
+        isCorrect = false;
       }
 
-      // 2. Ellenőrzés a jobb oldali szomszédhoz (ha nem a legutolsó helyre tette)
-      if (data.index < timeline.length) {
-        const nextVal = getVal(timeline[data.index]);
-        if (nextVal < newVal) isCorrect = false;
-      }
-
-      // --- EREDMÉNY KEZELÉSE ---
+      // Scoring
       if (isCorrect) {
-        // Helyes tipp: beszúrjuk a kártyát az idővonal megfelelő pontjára
         currentPlayer.timeline.splice(data.index, 0, fullCard);
+        delta = SCORES.CORRECT_PLACE;
+        currentPlayer.winStreak++;
+        currentPlayer.loseStreak = 0;
 
-        // Győzelem ellenőrzése: Elérte-e a játékos a cél-hosszúságot?
-        if (currentPlayer.timeline.length >= room.targetLength) {
-          io.to(data.roomCode).emit("game_over", {
-            winnerName: currentPlayer.name,
-            finalTimeline: currentPlayer.timeline,
-          });
-          return;
+        if (currentPlayer.winStreak >= SCORES.STREAK_THRESHOLD) {
+          bonusPoints = SCORES.BASE_BONUS +
+            (currentPlayer.winStreak - SCORES.STREAK_THRESHOLD) * SCORES.BONUS_INCREMENT;
+          delta += bonusPoints;
         }
+        currentPlayer.score += delta;
+
+        // If placed correctly, remove the card from active cards
+        shouldClearCard = true;
+
       } else {
-        // Hibás tipp: a kártya visszamegy a pakliba, amit újra megkeverünk
-        currentPlayer.mistakes += 1; // Szerver oldali hibaszámláló növelése
-        room.deck.push(fullCard);
-        room.deck = shuffle(room.deck);
+        currentPlayer.mistakes++;
+        currentPlayer.winStreak = 0;
+        currentPlayer.loseStreak++;
+
+        delta = SCORES.MISTAKE_PENALTY;
+
+        if (currentPlayer.loseStreak >= SCORES.STREAK_THRESHOLD) {
+          const extraPenalty = SCORES.EXTRA_PENALTY_BASE +
+            (currentPlayer.loseStreak - SCORES.STREAK_THRESHOLD) * SCORES.EXTRA_PENALTY_MULTIPLIER;
+          delta -= extraPenalty;
+          bonusPoints = extraPenalty;
+        }
+
+        currentPlayer.score = Math.max(0, currentPlayer.score + delta);
+
+        shouldClearCard = true; // The card must be removed from active cards, even if placed incorrectly
       }
 
-      // Miután a kártya lekerült a "játékos kezéből", töröljük az aktív kártya státuszt
-      room.activeCard = undefined;
+      currentPlayer.attempts++;
+      room.turnLocked = false;
 
-      // Eredmény kiküldése: Itt már felfedjük a kártya pontos dátumát a klienseknek
+      // Game over check
+      const isLastPlayerInRound = room.turnIndex === room.players.length - 1;
+      const isLastRoundImminent = isLastPlayerInRound && currentPlayer.attempts === room.targetLength - 1;
+      const isMistakeLimitReached = room.maxMistakes !== null && currentPlayer.mistakes >= room.maxMistakes;
+      const isGameLengthReached = isLastPlayerInRound && currentPlayer.attempts >= room.targetLength;
+      const isGameOver = isMistakeLimitReached || isGameLengthReached;
+
+      // Send result to everyone
       io.to(data.roomCode).emit("placement_result", {
         success: isCorrect,
         playerName: currentPlayer.name,
@@ -113,25 +201,254 @@ export const registerGameHandlers = (
         cardMonth: fullCard.month,
         cardDay: fullCard.day,
         fullDate: fullCard.fullDate,
-        players: room.players, // Frissített állapot (idővonalak, hibapontok)
+        players: room.players,
+        pointsEarned: delta,
+        bonusPoints: bonusPoints,
+        isLastRoundImminent,
+        isGameOver,
       });
+
+      // Game Over handling with SNAPSHOT
+      if (isGameOver) {
+        // Lock the game immediately to prevent race conditions
+        room.gameStarted = false;
+
+        // SNAPSHOT: Save the data BEFORE setTimeout
+        let gameOverPayload: any;
+
+        if (isMistakeLimitReached) {
+          gameOverPayload = {
+            winnerName: null,
+            finalTimeline: [...currentPlayer.timeline], // COPY
+            lost: true,
+            mistakes: currentPlayer.mistakes,
+            score: currentPlayer.score,
+            allPlayers: [...room.players], // COPY
+          };
+        } else if (isGameLengthReached) {
+          // Perfect Game Bonus
+          room.players.forEach((p) => {
+            if (p.mistakes === 0) p.score += SCORES.PERFECT_GAME_BONUS;
+          });
+
+          const maxScore = Math.max(...room.players.map((p) => p.score));
+          const winners = room.players.filter((p) => p.score === maxScore);
+
+          gameOverPayload = {
+            winnerNames: winners.map((w) => w.name),
+            winnerName: winners[0].name,
+            finalTimeline: [...winners[0].timeline], // COPY
+            score: maxScore,
+            allPlayers: [...room.players], // COPY
+          };
+        }
+
+        // ⏳ Delay with SNAPSHOT
+        setTimeout(() => {
+          // 🔒 Security check: Does the room STILL exist?
+          const currentRoom = roomsData[data.roomCode];
+          if (!currentRoom) return;
+
+          // ✅ Send SNAPSHOT (data hasn't changed)
+          io.to(data.roomCode).emit("game_over", gameOverPayload);
+        }, SCORES.GAME_OVER_DELAY_MS);
+      }
+
+    } catch (error) {
+      console.error("[place_card] Critical error:", error);
+      emitError(socket, ERROR_CODES.SERVER_ERROR, "Szerver hiba történt a kártya elhelyezése során");
+    } finally {
+      if (shouldClearCard && roomsData[data?.roomCode]?.activeCard) {
+        roomsData[data.roomCode].activeCard = undefined;
+      }
     }
-  );
+  });
 
-  // --- KÖVETKEZŐ KÖR KÉRÉSE (REQUEST NEXT TURN) ---
+  // ------------------------ DISCARD CARD ------------------------
+  socket.on("discard_card", (roomCode: string) => {
+    try {
+      const context = getAuthorizedTurnContext(socket, roomCode, roomsData);
+      if (!context) return;
+
+      const { room, currentPlayer } = context;
+
+      if (!room.activeCard) {
+        emitError(socket, ERROR_CODES.NO_ACTIVE_CARD, "Nincs mit eldobni!");
+        return;
+      }
+
+      currentPlayer.score = Math.max(0, currentPlayer.score + SCORES.DISCARD_PENALTY);
+
+      const oldCard = room.activeCard;
+      room.activeCard = undefined;
+
+      const pDeck = currentPlayer.personalDeck;
+      if (!pDeck) return;
+
+      // Collect used IDs
+      const usedIds = new Set<number>();
+      room.players.forEach((p) => {
+        p.timeline.forEach((s) => usedIds.add(s.id));
+        p.personalDeck.forEach((s) => usedIds.add(s.id));
+      });
+
+      const usedYears = new Set<number>();
+      currentPlayer.timeline.forEach((s) => usedYears.add(s.year));
+      pDeck.forEach((s) => usedYears.add(s.year));
+
+      // Search for new card
+      let newCard: Song | undefined;
+      const shuffledGlobal = shuffle([...hungarianSongs]);
+      for (const song of shuffledGlobal) {
+        if (!usedIds.has(song.id) && !usedYears.has(song.year)) {
+          newCard = song;
+          break;
+        }
+      }
+
+      if (newCard) {
+        pDeck.push(newCard);
+      } else {
+        emitMessage(socket, "warning", "Nincs több új kártya a pakliban!");
+      }
+
+      currentPlayer.personalDeck = pDeck;
+
+      io.to(roomCode).emit("music_playback_toggled", {
+        deezerId: oldCard.deezerId,
+        state: PLAYBACK_STATE.STOPPED,
+      });
+
+      io.to(roomCode).emit("card_discarded", {
+        playerId: currentPlayer.id,
+        playerName: currentPlayer.name,
+        players: room.players,
+        pointsEarned: SCORES.DISCARD_PENALTY,
+      });
+
+    } catch (error) {
+      console.error("[discard_card] Critical error:", error);
+      emitError(socket, ERROR_CODES.SERVER_ERROR, "Szerver hiba tortent a kartyaeldobas soran");
+    }
+  });
+
+  // ------------------------ REQUEST NEXT TURN ------------------------
   socket.on("request_next_turn", (roomCode: string) => {
-    const room = roomsData[roomCode];
-    // Ha a kör már le van zárva (várakozás), nem engedünk többszöri váltást
-    if (!room || room.turnLocked) return;
+    try {
+      const context = getAuthorizedTurnContext(socket, roomCode, roomsData);
+      if (!context) return;
 
-    room.turnLocked = true;
-    // Léptetjük a turnIndex-et (körforgásszerűen a játékosok között)
-    room.turnIndex = (room.turnIndex + 1) % room.players.length;
+      const { room } = context;
 
-    // Értesítjük a szobát, hogy ki a következő aktív játékos
-    io.to(roomCode).emit("turn_changed", {
-      currentTurn: room.players[room.turnIndex].id,
-      players: room.players,
+      if (room.turnLocked) {
+        emitError(socket, ERROR_CODES.ACTION_IN_PROGRESS, "Már folyamatban van a körváltás!");
+        return;
+      }
+
+      // Check if the player has already acted
+      if (room.activeCard) {
+        emitError(socket, ERROR_CODES.NO_ACTIVE_CARD, "Még van aktív kártya! Helyezd el vagy dobd el!");
+        return;
+      }
+
+      room.turnLocked = true;
+      room.turnIndex = (room.turnIndex + 1) % room.players.length;
+
+      io.to(roomCode).emit("turn_changed", {
+        currentTurn: room.players[room.turnIndex].id,
+        players: room.players,
+      });
+
+    } catch (error) {
+      console.error("[request_next_turn] Critical error:", error);
+      emitError(socket, ERROR_CODES.SERVER_ERROR, "Szerver hiba történt a körváltás során");
+    }
+  });
+
+  // ------------------------ UPDATE PENDING INDEX ------------------------
+  socket.on("update_pending_index", (data: { roomCode: string; index: number | null }) => {
+    try {
+      const context = getAuthorizedTurnContext(socket, data.roomCode, roomsData);
+      if (!context) return;
+
+      const { room, currentPlayer } = context;
+
+      // Only allow if there is an active card
+      if (!room.activeCard) {
+        return;
+      }
+
+      if (
+        data.index !== null &&
+        (!Number.isInteger(data.index) ||
+          data.index < 0 ||
+          data.index > currentPlayer.timeline.length)
+      ) {
+        return;
+      }
+
+      currentPlayer.pendingIndex = data.index;
+
+      // Only send it to others
+      socket.to(data.roomCode).emit("player_pending_updated", {
+        playerId: socket.id,
+        index: data.index,
+      });
+
+    } catch (error) {
+      console.error("[update_pending_index] Critical error:", error);
+    }
+  });
+
+  // ------------------------ SYNCHRONIZE PLAYBACK STATE ------------------------
+  socket.on("toggle_music_playback", (data: { roomCode: string; deezerId: string; state: number }) => {
+  try {
+    const context = getAuthorizedTurnContext(socket, data.roomCode, roomsData);
+    if (!context) return;
+    const { room } = context;
+
+    // Only synchronize if room settings allow it
+    if (!room.syncMusic) return;
+
+    // VALIDATION: Only allow valid states
+    const validStates = Object.values(PLAYBACK_STATE) as number[];
+    if (!validStates.includes(data.state)) return;
+
+    // VALIDATION: deezerId cannot be empty
+    if (!data.deezerId || data.deezerId.trim().length === 0) return;
+
+    // UPDATE: ONLY AFTER VALIDATIONS!
+    room.currentPlayingDeezerId = data.deezerId;
+    room.playbackState = data.state;
+
+    // Notify all clients in the room about the new playback state
+    io.to(data.roomCode).emit("music_playback_toggled", {
+      deezerId: data.deezerId,
+      state: data.state,
     });
+
+  } catch (error) {
+    console.error("[toggle_music_playback] Critical error:", error);
+  }
+});
+
+  // ------------------------ SYNCHRONIZE SEEK ------------------------
+  socket.on("seek_music_playback", (data: { roomCode: string; position: number }) => {
+    try {
+      const context = getAuthorizedTurnContext(socket, data.roomCode, roomsData);
+      if (!context) return;
+      const { room } = context;
+
+      // Only synchronize if room settings allow it
+      if (!room.syncMusic) return;
+
+      // Notify all clients in the room about the new position
+      io.to(data.roomCode).emit("music_seeked", {
+        position: data.position,
+      });
+
+    } catch (error) {
+      console.error("[seek_music_playback] Critical error:", error);
+    }
   });
 };

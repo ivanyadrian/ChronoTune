@@ -1,0 +1,81 @@
+import { AudioLines, MoveRight, User } from "lucide-react";
+import { Badge } from "../../../components/ui/Badge";
+import { StatItem } from "../components/StatItem";
+import { Divider } from "../components/Divider";
+
+interface NameStepProps {
+  userName: string;
+  setUserName: (name: string) => void;
+  onNext: () => void;
+}
+
+export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => (
+  <div className="w-full min-h-screen flex flex-col items-center justify-center px-4 py-8 sm:py-12">
+    {/* Main container - extra wrapper removed */}
+    <div className="w-full max-w-2xl p-[clamp(1rem,5vw,1.125rem)] bg-surface-dark/90 backdrop-blur-xl border border-white/5 border-t-4 border-t-purple-600/40 rounded-4xl sm:rounded-[3rem] shadow-2xl flex flex-col items-center gap-[clamp(1.5rem,4vw,2.5rem)]">
+      <AudioLines size={64} className="text-secondary-light bg-white/5 rounded-full p-4 w-16 h-16 sm:w-20 sm:h-20" />
+      <Badge text="Musical Timeline Challenge" />
+
+      <div className="space-y-4 text-center">
+        <h1 className="text-[clamp(2.35rem,10vw,3.75rem)] font-black text-white tracking-tighter leading-none">
+          Chrono
+          <span className="bg-linear-to-r from-(--secondary-light) to-(--secondary) bg-clip-text text-transparent">
+            Tune
+          </span>
+        </h1>
+        <p className="text-slate-400 text-[clamp(0.7rem,2vw,0.875rem)] leading-relaxed max-w-[45ch] mx-auto">
+          Úgy érzed, hogy a zenei ismereted magas? Képes vagy csupán
+          hangból megállapítani az évet?
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-[clamp(1rem,3vw,1.5rem)] w-full max-w-md mx-auto">
+        <div className="flex items-center p-[clamp(0.25rem,1vw,0.2rem)] bg-black/40 border border-white/10 focus-within:border-secondary/50 rounded-[clamp(1rem,2vw,1.5rem)] focus-within:ring-4 focus-within:ring-secondary/5 transition-all group">
+          <div className="pl-[clamp(0.75rem,2vw,1.25rem)] text-slate-500 group-focus-within:text-secondary-light transition-colors">
+            <User size={20} className="w-[clamp(1.1rem,2vw,1.25rem)] h-auto" />
+          </div>
+          <input
+            type="text"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="Add meg a neved"
+            maxLength={20}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && userName.trim()) {
+                onNext();
+              }
+            }}
+            className="w-full text-[clamp(1rem,2vw,1.125rem)] p-[clamp(0.75rem,2vw,1rem)] bg-transparent border-none outline-none text-white placeholder:text-slate-700 font-bold tracking-wider"
+          />
+        </div>
+
+        <button
+          disabled={!userName.trim()}
+          onClick={onNext}
+          aria-label="Tovább"
+          className="p-[clamp(1rem,2.5vw,1.125rem)] bg-primary rounded-[clamp(1rem,2vw,1.5rem)] text-text-primary font-black text-[clamp(0.875rem,1.5vw,1rem)] uppercase tracking-[0.2em] shadow-[0_10px_20px_-10px] shadow-primary/50 hover:shadow-[0_15px_30px_-10px] hover:shadow-primary/50 hover:-translate-y-0.5 active:translate-y-0.5 active:scale-[0.98] transition-all duration-300 disabled:opacity-20 disabled:grayscale disabled:pointer-events-none flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)]"
+        >
+          <span>Következő</span>
+          <MoveRight size={22} className="w-[clamp(1.1rem,2vw,1.4rem)] h-auto" />
+        </button>
+      </div>
+
+      <p className="text-[clamp(0.65rem,1.2vw,0.75rem)] mt-[clamp(0.5rem,2vw,1rem)] text-slate-600 italic text-center mx-auto">
+        Nincs szükség regisztrációra, a név csupán azonosításhoz szükséges.
+      </p>
+    </div>
+
+    {/* Statistics bar */}
+     <div className="mt-14 w-full max-w-3xl px-[clamp(1rem,4vw,2rem)]">
+      <div className="flex flex-wrap items-center justify-center gap-y-6 gap-x-10">
+          <StatItem value="900+" label="Szám" />
+        <div className="hidden md:block"><Divider /></div>
+          <StatItem value="PONTOS" label="Dátum" />
+        <div className="hidden md:block"><Divider /></div>
+        <div className="flex justify-center min-w-30">
+          <StatItem value="SZÁMOS" label="Korszak" />
+        </div>
+      </div>
+    </div>
+  </div>
+);

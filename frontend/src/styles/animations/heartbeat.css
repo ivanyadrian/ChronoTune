@@ -1,0 +1,16 @@
+@keyframes heartWave {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.25);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+.animate-heart-wave {
+  animation: heartWave 1.4s ease-in-out infinite;
+  transform-origin: center;
+}

@@ -1,0 +1,9 @@
+@layer base {
+  :root {
+    --primary: #d946ef; /*#d946ef*/
+    --secondary: #ad46ff; /*#ad46ff*/ /*purple-500*/
+    --secondary-light: #c27aff; /*#c27aff*/ /*purple-400*/
+    --bg-dark: #1a1021; /*#1a1021*/
+    --surface-dark: #1b0e26; /*#1b0e26*/
+  }
+}

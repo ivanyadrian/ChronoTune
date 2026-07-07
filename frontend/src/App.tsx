@@ -1,110 +1,222 @@
 import { useState } from "react";
 import { socket } from "./socket";
-import { GameBoard } from "./views/GameBoard";
-import { MenuView } from "./views/Menu";
-import { LobbyView } from "./views/Lobby";
-import { WinnerView } from "./views/Winner";
+import { GameBoard } from "./views/GameBoard/index";
+import { MenuView } from "./views/Menu/index";
+import { LobbyView } from "./views/Lobby/Lobby";
+import { GameResultView } from "./views/GameResult/GameResult";
 import { GameMessage } from "./components/GameMessage";
 import { useGameSocket } from "./hooks/useGameSocket";
+import { Toast } from "./components/Toast";
 
 function App() {
   const {
-    isConnected, roomCode, isHost, players, allPlayers, gameStarted,
-    currentTurnId, currentSong, winner, error, gameMessage, countdown,
-    createRoom, joinRoom, startGame, drawCard, placeCard, setError,
-    mistakes // Ezt adjuk hozzá a hook-hoz a hibák számlálásához
+    isConnected,
+    roomCode,
+    isHost,
+    players,
+    allPlayers,
+    gameStarted,
+    syncMusic,
+    targetLength: socketTargetLength,
+    currentTurnId,
+    currentSong,
+    winner,
+    lost,
+    error,
+    gameMessage,
+    countdown,
+    createRoom,
+    joinRoom,
+    startGame,
+    discardCard,
+    drawCard,
+    placeCard,
+    leaveRoom,
+    updateRoomConfig,
+    mistakes,
+    maxMistakes,
+    isRetryCard,
+    lastDelta,
+    isSolo,
+    onUpdatePending,
+    toast,
+    triggerToast,
+    toggleMusicPlayback,
+    seekMusicPlayback,
+    musicPlaybackState,
+    musicPlaybackDeezerId,
+    musicSeekTo,
   } = useGameSocket();
 
   const [userName, setUserName] = useState("");
-  const [targetLength, setTargetLength] = useState(10);
+  const [step, setStep] = useState<"name" | "choice" | "solo" | "multi">(
+    "name",
+  );
+  const [localTargetLength, setLocalTargetLength] = useState(10);
   const [inputCode, setInputCode] = useState("");
+  const [selectedMaxMistakes, setSelectedMaxMistakes] = useState<
+    number | null | undefined
+  >(undefined);
 
-  // A handleCreateRoom most már fogad egy isSolo paramétert a Menu-től
-  const handleCreateRoom = (isSolo: boolean = false) => {
-    if (!userName) return setError("Adj meg egy nevet!");
-    createRoom(userName, targetLength, isSolo);
+  // Use server value for non-host players
+  const effectiveTargetLength = isHost ? localTargetLength : socketTargetLength;
+
+  const handleRestart = () => {
+    leaveRoom();
+    setStep("solo");
   };
 
-  const handleJoinRoom = () => {
-    if (!userName) return setError("Adj meg egy nevet!");
-    if (inputCode.length !== 4) return setError("A kód 4 karakter!");
-    joinRoom(inputCode, userName);
+  const handleLeave = () => {
+    leaveRoom();
+    setStep("choice");
   };
+
+  const handleCreateRoom = (isSoloMode: boolean = false) => {
+    if (!userName) return triggerToast("Adj meg egy nevet!", "error");
+    createRoom(
+      userName,
+      localTargetLength,
+      isSoloMode,
+      isSoloMode ? (selectedMaxMistakes ?? null) : null,
+    );
+  };
+
+const handleJoinRoom = (codeFromComponent?: string) => {
+  if (!userName) return triggerToast("Adj meg egy nevet!", "error");
+  
+  // If code is provided from component, use it, otherwise use local state
+  const finalCode = codeFromComponent || inputCode;
+
+  if (finalCode.length !== 4) {
+    return triggerToast("A kódnak 4 karakter hosszúnak kell lennie!", "error");
+  }
+  
+  joinRoom(finalCode, userName);
+};
+
+  // Loading state
+ if (!isConnected) {
+  return (
+    <div className="flex items-center justify-center h-dvh">
+      <div className="text-center">
+        {/* CORRECTED LINE: "border-[var(--secondary-light)]" replaces the incorrect class */}
+        <div className="animate-spin w-10 h-10 border-4 border-secondary-light border-t-transparent rounded-full mx-auto mb-4" />
+        <p className="text-white/60 font-medium">Kapcsolódás a szerverhez...</p>
+        <p className="text-white/40 text-sm mt-2">
+          Ellenőrizd, hogy a backend fut-e
+        </p>
+      </div>
+    </div>
+  );
+}
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6 font-sans selection:bg-yellow-500 selection:text-black">
-      <header className="mb-12 text-center animate-in fade-in slide-in-from-top-4 duration-700">
-        <h1 className="text-6xl font-black text-yellow-500 tracking-tighter mb-2 drop-shadow-2xl">
-          CHRONOTUNE
-        </h1>
-        <p className="text-slate-400 uppercase tracking-widest text-xs font-bold opacity-80">
-          Idővonal csata háború — Készítette: Ivány Adrián
-        </p>
-      </header>
+    <div className="relative min-h-dvh text-white font-sans selection:bg-secondary-light selection:text-black">
+      <div className="grid-background pointer-events-none" />
 
-      <GameMessage message={gameMessage} countdown={countdown} />
-
-      {winner && (
-        <WinnerView 
-          winner={winner} 
-          mistakes={allPlayers.length === 1 ? mistakes : undefined} 
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Toast
+          isVisible={!!toast}
+          message={toast?.message}
+          type={toast?.type}
+          icon={toast?.icon}
         />
-      )}
 
-      <main className="relative z-10">
-        {!roomCode && (
-          <MenuView
-            userName={userName}
-            setUserName={setUserName}
-            handleCreateRoom={handleCreateRoom} // Most már kezeli az isSolo-t
-            handleJoinRoom={handleJoinRoom}
-            inputCode={inputCode}
-            setInputCode={setInputCode}
-            error={error}
-            targetLength={targetLength}
-            setTargetLength={setTargetLength}
+        <GameMessage
+          message={gameMessage}
+          countdown={countdown}
+          alwaysVisible={true}
+        />
+
+        {winner && (
+          <GameResultView
+            winner={winner}
+            lost={lost}
+            mistakes={mistakes}
+            maxMistakes={maxMistakes}
+            onLeave={handleLeave}
+            onRestart={isSolo ? handleRestart : undefined}
+            isSolo={isSolo}
+            players={isSolo ? [] : allPlayers}
           />
         )}
 
-        {roomCode && !gameStarted && (
-          <LobbyView 
-            roomCode={roomCode} 
-            players={players} 
-            isHost={isHost} 
-            startGame={startGame} 
-          />
-        )}
-
-        {gameStarted && !winner && (
-          <div className="relative">
-            {/* Solo mód esetén megjelenítjük a hibaszámlálót */}
-            {allPlayers.length === 1 && (
-              <div className="absolute -top-16 right-0 bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-2xl animate-in zoom-in duration-300">
-                <span className="text-[10px] font-black text-red-500 uppercase block leading-none mb-1">Hibák</span>
-                <span className="text-2xl font-black leading-none">{mistakes}</span>
-              </div>
-            )}
-            
-            <GameBoard
-              allPlayers={allPlayers}
-              currentTurnId={currentTurnId}
-              socketId={socket.id || ""}
-              currentSong={currentSong}
-              drawCard={drawCard}
-              onPlaceCard={placeCard}
+        <main className="w-full max-w-8xl mx-auto">
+          {!roomCode && !winner && (
+            <MenuView
+              userName={userName}
+              setUserName={setUserName}
+              handleCreateRoom={handleCreateRoom}
+              handleJoinRoom={handleJoinRoom}
+              inputCode={inputCode}
+              setInputCode={setInputCode}
+              error={error}
+              targetLength={localTargetLength}
+              setTargetLength={setLocalTargetLength}
+              isConnected={isConnected}
+              selectedMaxMistakes={selectedMaxMistakes}
+              setSelectedMaxMistakes={setSelectedMaxMistakes}
+              step={step}
+              setStep={setStep}
             />
-          </div>
-        )}
-      </main>
+          )}
 
-      <footer className="mt-16 flex justify-center items-center gap-4 animate-in fade-in duration-1000">
-        <div className={`px-4 py-1.5 rounded-full text-[10px] font-black border flex items-center gap-2 transition-all duration-500 ${
-          isConnected ? "border-green-500/50 text-green-500 bg-green-500/5" : "border-red-500/50 text-red-500 animate-pulse bg-red-500/5"
-        }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`} />
-          {isConnected ? "SZERVER ONLINE" : "KAPCSOLÓDÁS..."}
-        </div>
-      </footer>
+          {roomCode && !gameStarted && !winner && (
+            <div className="flex items-center justify-center">
+              <LobbyView
+                roomCode={roomCode}
+                players={players}
+                isHost={isHost}
+                currentUserName={userName}
+                targetLength={effectiveTargetLength}
+                syncMusic={syncMusic}
+                onSyncMusicChange={(val) =>
+                  updateRoomConfig({ syncMusic: val })
+                }
+                onTargetLengthChange={(val) => {
+                  setLocalTargetLength(val);
+                  if (isHost) updateRoomConfig({ targetLength: val });
+                }}
+                onShowToast={triggerToast}
+                startGame={startGame}
+                onLeave={handleLeave}
+              />
+            </div>
+          )}
+
+          {gameStarted && !winner && (
+            <div className="relative">
+              <GameBoard
+                gameState={{
+                  allPlayers,
+                  currentTurnId,
+                  currentSong,
+                  isRetryCard,
+                  lastDelta,
+                  maxMistakes,
+                  targetLength: effectiveTargetLength,
+                  isSolo,
+                  syncMusic,
+                  roomCode,
+                  musicPlaybackState,
+                  musicPlaybackDeezerId,
+                  musicSeekTo,
+                }}
+                actions={{
+                  drawCard,
+                  discardCard,
+                  onUpdatePending,
+                  onPlaceCard: placeCard,
+                  onLeaveGame: handleLeave,
+                  toggleMusicPlayback,
+                  seekMusicPlayback,
+                }}
+                socketId={socket.id || ""}
+              />
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

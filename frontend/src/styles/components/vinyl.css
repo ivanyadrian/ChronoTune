@@ -1,0 +1,22 @@
+.vinyl-texture {
+  background: 
+    conic-gradient(
+      from 0deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 10%,
+      transparent 20%,
+      transparent 40%,
+      rgba(255, 255, 255, 0.08) 50%,
+      transparent 60%,
+      transparent 80%,
+      rgba(255, 255, 255, 0.05) 90%,
+      transparent 100%
+    ),
+    repeating-radial-gradient(
+        circle at center,
+        #111,
+        #111 2px,
+        #181818 3px,
+        #111 4px
+      );
+}

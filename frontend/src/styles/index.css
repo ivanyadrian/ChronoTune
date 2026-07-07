@@ -1,0 +1,16 @@
+@import "./tailwind.css";
+@import "./fonts.css";
+@import "./variables.css";
+@import "./base.css";
+
+/* Komponensek */
+@import "./components/buttons.css";
+@import "./components/vinyl.css";
+
+/* Animációk */
+@import "./animations/visualizer.css";
+@import "./animations/slide.css";
+@import "./animations/heartbeat.css";
+
+/* Segédprogramok */
+@import "./utils/scrollbar.css";
