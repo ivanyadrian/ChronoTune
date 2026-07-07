@@ -113,7 +113,6 @@ export const MusicPlayer = ({
   // Watch for incoming seek commands via prop (synchronization)
   useEffect(() => {
     if (audioRef.current && seekTo !== null) {
-      console.log("MusicPlayer: Tekerés a kért pozícióra:", seekTo);
       audioRef.current.currentTime = seekTo;
     }
   }, [seekTo]);
