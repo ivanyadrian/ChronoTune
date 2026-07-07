@@ -88,6 +88,6 @@ io.on("connection", (socket) => {
 });
 
 // START SERVER
-// httpServer.listen(PORT, () => {
-//   console.log(`Szerver fut a http://localhost:${PORT} címen`);
-// });
+httpServer.listen(PORT, () => {
+  console.log(`Szerver fut a http://localhost:${PORT} címen`);
+});
