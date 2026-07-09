@@ -14,6 +14,7 @@ import LeaveGameButton from "../../components/ui/LeaveGameButton";
 import RangeSlider from "../../components/RangeSlider";
 import type { ReactNode } from "react";
 import { useState, useRef, useEffect } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 interface LobbyViewProps {
   roomCode: string;
@@ -47,14 +48,6 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   onLeave,
 }) => {
   const textToCopy = roomCode;
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      onShowToast("Sikeresen másolva!", "success");
-    } catch (err) {
-      console.error("Sikertelen másolás:", err);
-    }
-  };
 
   // MISSING STATES
   const [showTopIndicator, setShowTopIndicator] = useState(false);
@@ -105,7 +98,7 @@ useEffect(() => {
 
       <div className="flex flex-col sm:flex-row items-center justify-between mb-5 w-full max-w-md mx-auto rounded-4xl bg-bg-dark border border-white/7 p-2 gap-4">
         <div className="flex flex-col gap-1 px-4 py-2 text-center sm:text-left">
-          <p className="text-primary text-[0.7rem] font-black uppercase tracking-[0.2em]">
+          <p className="text-primary text-[0.7rem] font-archivo uppercase tracking-[0.2em]">
             Meghívás
           </p>
           <p className="text-slate-400 text-[0.8rem] leading-tight sm:max-w-none">
@@ -113,18 +106,22 @@ useEffect(() => {
           </p>
         </div>
 
-        <div
-          className="w-full sm:w-auto rounded-3xl flex items-center justify-center bg-[#2d1b3e] border border-white/10 px-6 py-4 gap-3 cursor-pointer hover:bg-[#39224f] hover:border-primary/50 transition-all active:scale-95 group"
-          onClick={handleCopy}
+        <CopyToClipboard 
+          text={textToCopy}
+          onCopy={() => onShowToast("Sikeresen másolva!", "success")}
         >
-          <Copy
-            className="text-white group-hover:text-primary transition-colors"
-            size={18}
-          />
-          <p className="text-white text-[0.9rem] font-bold tracking-wide whitespace-nowrap">
-            Kód másolása
-          </p>
-        </div>
+          <div
+            className="w-full sm:w-auto rounded-3xl flex items-center justify-center bg-[#2d1b3e] border border-white/10 px-6 py-4 gap-3 cursor-pointer hover:bg-[#39224f] hover:border-primary/50 transition-all active:scale-95 group"
+          >
+            <Copy
+              className="text-white group-hover:text-primary transition-colors"
+              size={18}
+            />
+            <p className="text-white text-[0.9rem] font-bold tracking-wide whitespace-nowrap">
+              Kód másolása
+            </p>
+          </div>
+        </CopyToClipboard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-7xl mx-auto">
@@ -192,23 +189,23 @@ useEffect(() => {
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
               <Flag className="text-primary shrink-0" size={24} />
-              <h3 className="text-white font-black uppercase tracking-widest text-fluid-h4">
+              <h3 className="text-white font-archivo uppercase tracking-widest text-fluid-h4">
                 Játék hossza
               </h3>
             </div>
             <p className="text-slate-400 text-fluid-p max-w-md mb-7">
               Minden játékos összesen{" "}
-              <span className="text-primary text-lg sm:text-xl font-black italic leading-none drop-shadow-[0_0_10px] shadow-primary/30">
+              <span className="text-primary text-lg sm:text-xl font-archivo italic leading-none drop-shadow-[0_0_10px] shadow-primary/30">
                 {targetLength} {""}
               </span>
               alkalommal kerül sorra a játék során.
               <br />
               {isHost ? (
-                <span className="text-[#46ef87] font-bold block mt-2">
+                <span className="text-[#46ef87] font-archivo block mt-2">
                   Hostként módosíthatod az értékeket.
                 </span>
               ) : (
-                <span className="text-[#ff0303] font-bold block mt-2">
+                <span className="text-[#ff0303] font-archivo block mt-2">
                   Csak a host végezhet módosításokat!
                 </span>
               )}
@@ -230,7 +227,7 @@ useEffect(() => {
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-3">
                 <Repeat2 className="text-primary shrink-0" size={24} />
-                <h3 className="text-white font-black uppercase tracking-widest text-fluid-h4">
+                <h3 className="text-white font-archivo uppercase tracking-widest text-fluid-h4">
                   Szinkronizált lejátszás
                 </h3>
               </div>
@@ -263,10 +260,10 @@ useEffect(() => {
             <button
               onClick={() => isHost && startGame()}
               disabled={!isHost}
-              className="p-3.5 sm:p-4 bg-primary w-full rounded-full mt-7 sm:mt-10 text-white font-bold flex items-center justify-center gap-2 tracking-widest uppercase hover:brightness-110 hover:scale-102 hover:shadow-[0_0_20px_3px_rgba(239,77,255,0.4)] active:scale-105 transition-all disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
+              className="p-3.5 font-archivo sm:p-4 bg-primary w-full rounded-full mt-7 sm:mt-10 text-white font-bold flex items-center justify-center gap-2 tracking-widest uppercase hover:brightness-110 hover:scale-102 hover:shadow-[0_0_20px_3px_rgba(239,77,255,0.4)] active:scale-105 transition-all disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
             >
-              <Play size={18} className="pt-1 fill-white sm:w-5 sm:h-5" />
-              <span className="text-sm sm:text-base lg:text-lg">
+              <Play size={18} className="fill-white sm:w-5 sm:h-5" />
+              <span className="text-[clamp(0.875rem,1.5vw,1rem)]">
                 Játék Indítása
               </span>
             </button>
