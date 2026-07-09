@@ -29,7 +29,7 @@ const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
             text-[clamp(9px,1.2vw,12px)] 
             bg-red-500 rounded-[clamp(8px,1vw,12px)] 
             text-white font-bold uppercase tracking-widest 
-            transition-all duration-300 hover:scale-105"
+            transition-all duration-300 hover:scale-105 font-archivo"
         >
           <span>Kilépés</span>
         </button>
@@ -58,7 +58,7 @@ const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
                 onClick={onConfirm}
                 className="w-full rounded-xl bg-red-700 py-3 font-bold text-white transition hover:bg-red-600 active:scale-95"
               >
-                <p className="text-fluid-p tracking-widest"> ELHAGYOM </p>
+                <p className="text-fluid-p tracking-widest font-archivo"> Elhagyom </p>
               </button>
               <button
                 onClick={() => setShowConfirm(false)}

@@ -62,7 +62,7 @@ const RangeSlider = ({
                 }`}
               />
               <span
-                className={`text-xs sm:text-sm font-black transition-all duration-300 ${
+                className={`text-xs sm:text-sm font-archivo transition-all duration-300 ${
                   isActive 
                     ? "text-primary scale-125 sm:scale-150" 
                     : "text-slate-600 hover:text-slate-400"

@@ -44,7 +44,7 @@ export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
           {/* Icon and Main Text */}
           <div className="flex flex-col items-center gap-4">
             <h2
-              className={`text-xl sm:text-3xl font-black uppercase tracking-tighter italic text-center leading-tight ${
+              className={`text-xl sm:text-3xl font-archivo uppercase tracking-tighter italic text-center leading-tight ${
                 isInformation
                   ? "text-fuchsia-400"
                   : message.status === "success"
@@ -58,7 +58,7 @@ export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
               message.pointsEarned !== undefined &&
               message.pointsEarned > 0 && (
                 <div className="animate-in zoom-in-50 duration-500 delay-200 flex items-center gap-3">
-                  <div className="text-4xl sm:text-6xl font-black italic drop-shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center gap-4">
+                  <div className="text-4xl sm:text-6xl font-archivo italic drop-shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center gap-4">
                     {message.bonusPoints && Number(message.bonusPoints) > 0 ? (
                       <>
                         <span className="text-white">
@@ -76,7 +76,7 @@ export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
                   </div>
 
                   {/* always shown */}
-                  <span className="text-white/60 text-2xl sm:text-4xl font-black not-italic uppercase">
+                  <span className="text-white/60 text-2xl sm:text-4xl font-archivo not-italic uppercase">
                     pont
                   </span>
                 </div>
@@ -84,7 +84,7 @@ export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
             {message.status === "error" &&
               message.pointsEarned !== undefined && (
                 <div className="animate-in zoom-in-50 duration-500 delay-200 flex items-center gap-3">
-                  <div className="text-4xl sm:text-6xl font-black italic drop-shadow-[0_0_20px_rgba(239,68,68,0.5)] flex items-center gap-4">
+                  <div className="text-4xl sm:text-6xl font-archivo italic drop-shadow-[0_0_20px_rgba(239,68,68,0.5)] flex items-center gap-4">
                     {message.bonusPoints && Number(message.bonusPoints) > 0 ? (
                       <>
                         <span className="text-white">
@@ -99,7 +99,7 @@ export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
                     )}
                   </div>
 
-                  <span className="text-white/60 text-2xl sm:text-4xl font-black not-italic uppercase">
+                  <span className="text-white/60 text-2xl sm:text-4xl font-archivo not-italic uppercase">
                     pont
                   </span>
                 </div>
@@ -113,7 +113,7 @@ export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
               <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
                 Soron következő:
               </span>
-              <span className="text-3xl sm:text-5xl font-black text-white italic uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+              <span className="text-3xl sm:text-5xl font-archivo text-white italic uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                 {nextPlayerName}
               </span>
             </div>

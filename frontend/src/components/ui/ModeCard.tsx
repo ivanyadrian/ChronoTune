@@ -73,7 +73,7 @@ const ModeCard = ({
         <h3
           className={`
             text-[clamp(1.5rem,3.5vw,2.2rem)] 
-            font-black italic uppercase tracking-tighter 
+            font-archivo italic uppercase tracking-tighter 
             ${titleColor || colorClass}
             leading-[1.1]
           `}

@@ -20,7 +20,7 @@ export const VerticalTimeline = ({
     <div className="flex flex-col h-full bg-[#12051d] border-l border-white/5 overflow-hidden">
       {/* Header */}
       <div className="p-6 border-b border-white/5 bg-black/20 backdrop-blur-md shrink-0">
-        <h2 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter text-white">
+        <h2 className="text-xl sm:text-2xl font-archivo uppercase italic tracking-tighter text-white">
           {title}
         </h2>
         <p className="text-zinc-500 text-xs sm:text-sm font-medium mt-1">
@@ -57,7 +57,7 @@ export const VerticalTimeline = ({
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="inline-flex px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-[10px] font-black uppercase mb-1.5">
+                  <div className="inline-flex px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-[10px] font-archivo uppercase mb-1.5">
                     {song.year}
                   </div>
                   <h4 className="text-white font-bold text-base sm:text-lg truncate leading-tight">

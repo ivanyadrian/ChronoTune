@@ -17,9 +17,9 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => (
       <Badge text="Musical Timeline Challenge" />
 
       <div className="space-y-4 text-center">
-        <h1 className="text-[clamp(2.35rem,10vw,3.75rem)] font-black text-white tracking-tighter leading-none">
+        <h1 className="text-[clamp(2.35rem,10vw,3.75rem)] font-archivo text-white tracking-tighter leading-none pl-2">
           Chrono
-          <span className="bg-linear-to-r from-(--secondary-light) to-(--secondary) bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-(--secondary-light) to-(--secondary) bg-clip-text text-transparent pr-2">
             Tune
           </span>
         </h1>
@@ -45,7 +45,7 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => (
                 onNext();
               }
             }}
-            className="w-full text-[clamp(1rem,2vw,1.125rem)] p-[clamp(0.75rem,2vw,1rem)] bg-transparent border-none outline-none text-white placeholder:text-slate-700 font-bold tracking-wider"
+            className="font-extrabold w-full text-[clamp(1rem,2vw,1.125rem)] p-[clamp(0.75rem,2vw,1rem)] bg-transparent border-none outline-none text-white placeholder:text-slate-700 tracking-wider"
           />
         </div>
 
@@ -53,10 +53,15 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => (
           disabled={!userName.trim()}
           onClick={onNext}
           aria-label="Tovább"
-          className="p-[clamp(1rem,2.5vw,1.125rem)] bg-primary rounded-[clamp(1rem,2vw,1.5rem)] text-text-primary font-black text-[clamp(0.875rem,1.5vw,1rem)] uppercase tracking-[0.2em] shadow-[0_10px_20px_-10px] shadow-primary/50 hover:shadow-[0_15px_30px_-10px] hover:shadow-primary/50 hover:-translate-y-0.5 active:translate-y-0.5 active:scale-[0.98] transition-all duration-300 disabled:opacity-20 disabled:grayscale disabled:pointer-events-none flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)]"
+          className="bg-primary rounded-2xl flex items-center justify-center p-[clamp(0.85rem,2vw,1.15rem)] font-archivo gap-2 tracking-widest uppercase
+            disabled:opacity-20 disabled:grayscale disabled:pointer-events-none
+            shadow-[0_10px_20px_-10px] shadow-primary/50 
+            hover:shadow-[0_15px_30px_-10px] hover:shadow-primary/50 hover:-translate-y-0.5
+            active:translate-y-0.5 active:scale-[0.98] transition-all duration-300"
         >
+
           <span>Következő</span>
-          <MoveRight size={22} className="w-[clamp(1.1rem,2vw,1.4rem)] h-auto" />
+          <MoveRight size={22} className="w-[clamp(1.1rem,2vw,1.4rem)]" strokeWidth={3} />
         </button>
       </div>
 

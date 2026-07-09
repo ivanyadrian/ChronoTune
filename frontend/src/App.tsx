@@ -111,7 +111,7 @@ const handleJoinRoom = (codeFromComponent?: string) => {
 }
 
   return (
-    <div className="relative min-h-dvh text-white font-sans selection:bg-secondary-light selection:text-black">
+    <div className="relative min-h-dvh text-white bg-linear-to-br from-[rgb(45,13,58)] via-[rgb(15,5,24)] to-[rgb(33,10,43)] font-sans selection:bg-secondary-light selection:text-black">
       <div className="grid-background pointer-events-none" />
 
       <div className="relative z-10 flex flex-col min-h-screen">

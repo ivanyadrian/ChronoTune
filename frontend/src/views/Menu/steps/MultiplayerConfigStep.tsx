@@ -44,7 +44,7 @@ export const MultiplayerConfigStep = ({
                 strokeWidth={3}
               />
             </div>
-            <h3 className="text-2xl sm:text-4xl font-black text-white italic uppercase tracking-tighter">
+            <h3 className="text-2xl sm:text-4xl font-archivo text-white italic uppercase tracking-tighter">
               Új játék
             </h3>
             <p className="text-xs sm:text-base text-slate-400 mt-4 leading-relaxed max-w-xs mx-auto">
@@ -59,7 +59,7 @@ export const MultiplayerConfigStep = ({
               onClick={onCreateRoom}
               className="relative w-full py-4 sm:py-5 px-6 sm:px-10 bg-linear-to-b from-(--primary) to-[color-mix(in_srgb,var(--primary)_80%,black)] rounded-full flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
             >
-              <span className="text-white font-black text-sm sm:text-lg uppercase tracking-wider">
+              <span className="text-white font-archivo text-[clamp(0.875rem,1.5vw,1rem)] uppercase tracking-wider">
                 Létrehozás
               </span>
             </button>
@@ -76,7 +76,7 @@ export const MultiplayerConfigStep = ({
                 strokeWidth={2.5}
               />
             </div>
-            <h3 className="text-2xl sm:text-4xl font-black text-white italic uppercase tracking-tighter">
+            <h3 className="text-2xl sm:text-4xl font-archivo text-white italic uppercase tracking-tighter">
               Csatlakozás
             </h3>
             <p className="text-xs sm:text-base text-slate-400 mt-4 leading-relaxed max-w-xs mx-auto">
@@ -85,7 +85,7 @@ export const MultiplayerConfigStep = ({
           </div>
 
           <div className="w-full max-w-sm mt-8 sm:mt-12 lg:mt-auto">
-            <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 lg:mt-10 mb-4 block">
+            <label className="text-[9px] sm:text-[10px] font-archivo uppercase tracking-[0.3em] text-slate-500 lg:mt-10 mb-4 block">
               Szoba azonosító
             </label>
 
@@ -154,7 +154,7 @@ export const MultiplayerConfigStep = ({
                       inputRefs.current[index - 1]?.focus();
                     }
                   }}
-                  className="w-full aspect-square sm:w-full sm:h-20 bg-black/40 border-2 border-secondary/10 focus:border-primary/50 focus:bg-black/60 rounded-xl sm:rounded-2xl text-center font-black text-xl sm:text-3xl text-primary outline-none transition-all shadow-inner"
+                  className="w-full aspect-square sm:w-full sm:h-20 bg-black/40 border-2 border-secondary/10 focus:border-primary/50 focus:bg-black/60 rounded-xl sm:rounded-2xl text-center font-archivo text-xl sm:text-3xl text-primary outline-none transition-all shadow-inner"
                 />
               ))}
             </div>
@@ -164,7 +164,7 @@ export const MultiplayerConfigStep = ({
               disabled={!/^[A-Z0-9]{4}$/.test(inputCode)}
               className="w-full py-4 sm:py-5 px-6 border-2 border-primary rounded-full flex items-center justify-center gap-3 transition-all hover:bg-primary/10 active:scale-95 disabled:opacity-20 disabled:grayscale"
             >
-              <span className="text-primary font-black text-sm sm:text-lg uppercase tracking-wider">
+              <span className="text-primary font-archivo text-sm sm:text-lg uppercase tracking-wider">
                 Belépés
               </span>
               <MoveRight

@@ -11,6 +11,9 @@
 
   /* Other non-color configurations will remain here */
   --font-sekuya: "Sekuya", sans-serif;
+  --font-archivo: "Archivo Black", sans-serif;
+  --font-lilita: "Lilita One", sans-serif;
+  --font-sans: "Sans", sans-serif;
   --text-fluid-h1: clamp(2.2rem, 8vw, 4.5rem);
   --text-fluid-h2: clamp(1.25rem, 3vw, 1.75rem);
   --text-fluid-h3: clamp(1.15rem, 2.5vw, 1.5rem);

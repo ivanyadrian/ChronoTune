@@ -17,7 +17,7 @@ export const TimelinePreview = ({ targetLength }: TimelinePreviewProps) => {
         {[1, 2, 3, 4].map((num) => (
           <React.Fragment key={num}>
             <div className={`${cardSlotClass} ${num === 3 ? "hidden sm:flex" : ""} ${num === 4 ? "hidden lg:flex" : ""}`}>
-              <span className="text-xs sm:text-sm font-black text-slate-700">{num}</span>
+              <span className="text-xs sm:text-sm font-archivo text-slate-700">{num}</span>
             </div>
             <div className={`${dashedLineClass} ${num === 3 ? "hidden sm:block" : ""} ${num === 4 ? "hidden lg:block" : ""}`} />
           </React.Fragment>
@@ -25,13 +25,13 @@ export const TimelinePreview = ({ targetLength }: TimelinePreviewProps) => {
 
         {/* Three-dot transition (Unnecessary fragment removed) */}
         <div className={cardSlotClass}>
-          <span className="text-xs sm:text-sm font-black text-slate-700">...</span>
+          <span className="text-xs sm:text-sm font-archivo text-slate-700">...</span>
         </div>
         <div className={dashedLineClass} />
 
         {/* Destination / last card */}
         <div className="flex items-center justify-center w-8 h-12 sm:w-13 sm:h-17 rounded-lg bg-primary shrink-0 animate-pulse-slow">
-          <span className="text-base sm:text-xl font-black text-white italic">
+          <span className="text-base sm:text-xl font-archivo text-white">
             {targetLength}
           </span>
         </div>

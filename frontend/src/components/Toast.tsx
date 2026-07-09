@@ -76,7 +76,7 @@ export const Toast = ({
           </div>
 
           {/* Text - Leading-none helps with vertical centering */}
-          <span className="text-white text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] leading-4 mb-px">
+          <span className="text-white text-[10px] sm:text-[11px] font-archivo uppercase tracking-[0.2em] leading-4 mb-px">
             {displayMessage}
           </span>
         </div>

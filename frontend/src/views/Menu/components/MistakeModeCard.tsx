@@ -22,7 +22,7 @@ export const MistakeModeCard = ({ mode, isActive, onClick }: MistakeModeCardProp
       }`}
     >
       <span
-        className={`text-[7px] sm:text-[9px] font-black tracking-widest px-1.5 py-0.5 mb-2 rounded-md border transition-colors ${
+        className={`text-[7px] sm:text-[9px] font-archivo tracking-widest px-1.5 py-0.5 mb-2 rounded-md border transition-colors ${
           isActive ? mode.badgeClass : "bg-white/5 border-white/10 text-slate-500"
         }`}
       >
@@ -37,7 +37,7 @@ export const MistakeModeCard = ({ mode, isActive, onClick }: MistakeModeCardProp
             }`}
           />
         ) : (
-          <div className={`flex items-center font-black text-3xl sm:text-5xl italic transition-colors ${isActive ? mode.colorClass : "text-slate-500"}`}>
+          <div className={`flex items-center font-archivo text-3xl sm:text-5xl italic transition-colors ${isActive ? mode.colorClass : "text-slate-500"}`}>
             <span>{mode.value}X</span>
             <Heart className={`w-10 h-10 sm:w-14 sm:h-14 -m-1 transition-colors ${isActive ? mode.fillClass : "fill-slate-500"}`} />
           </div>

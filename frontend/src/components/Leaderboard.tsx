@@ -94,7 +94,7 @@ export const Leaderboard = ({
               <div className="relative z-10 flex items-center justify-center">
                 <div
                   className={`
-                    w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center font-black text-sm lg:text-base rounded-l-2xl transition-colors duration-300
+                    w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center font-archivo text-sm lg:text-base rounded-l-2xl transition-colors duration-300
                     ${
                       player.score > 0
                         ? rank === 1
@@ -126,12 +126,12 @@ export const Leaderboard = ({
                   )}
 
                   {isCurrent && (
-                    <span className="lg:hidden text-[8px] bg-secondary/80 text-purple-100 px-1 py-0.5 rounded font-black tracking-wide shrink-0 uppercase">
+                    <span className="lg:hidden text-[8px] bg-secondary/80 text-purple-100 px-1 py-0.5 rounded font-archivo tracking-wide shrink-0 uppercase">
                       Most
                     </span>
                   )}
                   {!isCurrent && isNext && (
-                    <span className="lg:hidden text-[8px] bg-blue-500/40 text-blue-200 border border-blue-500/30 px-1 py-0.5 rounded font-black tracking-wide shrink-0 uppercase">
+                    <span className="lg:hidden text-[8px] bg-blue-500/40 text-blue-200 border border-blue-500/30 px-1 py-0.5 rounded font-archivo tracking-wide shrink-0 uppercase">
                       Köv.
                     </span>
                   )}
@@ -155,7 +155,7 @@ export const Leaderboard = ({
                 {delta !== 0 ? (
                   /* IF THERE IS A DELTA: SHOW THE UPDATED SCORE */
                   <div
-                    className={`text-xl lg:text-2xl font-black tabular-nums transition-all duration-300 animate-in fade-in slide-in-from-top-1 ${
+                    className={`text-xl lg:text-2xl font-archivo tabular-nums transition-all duration-300 animate-in fade-in slide-in-from-top-1 ${
                       delta > 0
                         ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]"
                         : "text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]"
@@ -167,7 +167,7 @@ export const Leaderboard = ({
                   /* IF THERE IS NO DELTA: Keep the default score and streak glow */
                   <div
                     className={`
-                      text-xl lg:text-2xl font-black tabular-nums transition-all duration-300
+                      text-xl lg:text-2xl font-archivo tabular-nums transition-all duration-300
                       ${
                         isWinStreak
                           ? "text-secondary-light drop-shadow-[0_0_8px] shadow-secondary-light/50"

@@ -37,7 +37,7 @@ export const SoloConfigStep = ({
       </div>
 
       <div className="flex flex-col gap-3 text-start">
-        <h1 className="text-fluid-h1 font-black text-white tracking-tighter">
+        <h1 className="text-fluid-h1 font-archivo text-white tracking-tighter">
           Testreszabás
         </h1>
         <p className="text-fluid-p text-slate-400 max-w-md">
@@ -54,7 +54,7 @@ export const SoloConfigStep = ({
               size={22}
               className="text-secondary fill-secondary/20 sm:w-6.5 sm:h-6.5"
             />
-            <h2 className="text-base sm:text-xl font-black text-white tracking-widest uppercase italic">
+            <h2 className="text-base sm:text-xl font-archivo text-white tracking-widest uppercase italic">
               Játék hossza
             </h2>
           </div>
@@ -66,10 +66,10 @@ export const SoloConfigStep = ({
 
         <div className="bg-[#241631] border border-white/5 p-5 sm:p-8 lg:p-10 rounded-4xl shadow-2xl">
           <div className="flex justify-start items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <span className="text-primary text-lg sm:text-xl font-black italic leading-none drop-shadow-[0_0_7px] shadow-primary">
+            <span className="text-primary text-lg sm:text-xl font-lilita italic leading-none drop-shadow-[0_0_7px] shadow-primary">
               {targetLength}
             </span>
-            <h3 className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-slate-500 leading-none">
+            <h3 className="text-[9px] sm:text-[10px] font-sans uppercase tracking-[0.2em] sm:tracking-[0.3em] text-slate-500 leading-none">
               lehetőséged lesz kártyát elhelyezni
             </h3>
           </div>
@@ -90,7 +90,7 @@ export const SoloConfigStep = ({
             size={22}
             className="text-secondary fill-secondary/20 sm:w-6.5 sm:h-6.5"
           />
-          <h2 className="text-sm sm:text-xl font-black text-white tracking-widest uppercase italic">
+          <h2 className="text-sm sm:text-xl font-archivo text-white tracking-widest uppercase italic">
             Hibahatár beállítása
           </h2>
         </div>
@@ -106,7 +106,7 @@ export const SoloConfigStep = ({
           ))}
         </div>
 
-        {activeOption && (
+        {activeOption ? (
           <div
             className={`mt-4 sm:mt-8 px-4 py-3 bg-white/5 border-l-4 rounded-r-xl transition-all duration-500 animate-in fade-in zoom-in-95 ${activeOption.borderClass}`}
           >
@@ -116,17 +116,25 @@ export const SoloConfigStep = ({
               {activeOption.desc}
             </p>
           </div>
+        ) : (
+          <div
+            className="mt-4 sm:mt-8 px-4 py-3 bg-white/5 border-l-4 border-slate-500/30 rounded-r-xl transition-all duration-500"
+          >
+            <p className="text-xs sm:text-base italic font-medium tracking-wide text-slate-400">
+              Válassz ki egy hibahatárt a folytatáshoz!
+            </p>
+          </div>
         )}
       </div>
 
       {/* Timeline Preview */}
       <div className="mt-10 sm:mt-20 w-full max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-5 sm:mb-8 flex-wrap gap-2">
-          <h2 className="text-base sm:text-xl font-black text-white tracking-widest uppercase italic">
+          <h2 className="text-base sm:text-xl font-archivo text-white tracking-widest uppercase italic">
             Timeline Preview
           </h2>
           <div className="w-fit flex justify-center items-center border-2 border-primary/30 rounded-full px-3 sm:px-5 py-1.5 sm:py-2 bg-primary/5 shadow-[0_0_15px] shadow-primary/20">
-            <span className="text-primary font-black text-xs sm:text-sm uppercase tracking-wider">
+            <span className="text-primary font-archivo text-xs sm:text-sm uppercase tracking-wider">
               {targetLength} kártya
             </span>
           </div>
@@ -137,11 +145,12 @@ export const SoloConfigStep = ({
       <button
         disabled={!userName.trim() || selectedMaxMistakes === undefined}
         onClick={onStart}
-        className="p-[clamp(0.85rem,2.5vw,1.15rem)] text-[clamp(0.875rem,1.5vw,1rem)] mt-[clamp(2rem,6vw,2.5rem)] w-full rounded-full bg-primary text-white font-bold flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)] tracking-widest uppercase transition-all hover:brightness-110 hover:scale-[1.02] hover:shadow-[0_0_20px_3px] hover:shadow-primary/40 active:scale-[0.98] disabled:opacity-30 disabled:grayscale"
+        className="font-archivo p-[clamp(0.85rem,2.5vw,1.15rem)] text-[clamp(0.875rem,1.5vw,1rem)] mt-[clamp(2rem,6vw,2.5rem)] w-full rounded-full bg-primary text-white flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)] tracking-widest uppercase transition-all hover:brightness-110 hover:shadow-[0_0_20px_3px] hover:scale-102 active:scale-98 hover:shadow-primary/40 disabled:opacity-30 disabled:grayscale"
       >
         <Play
           size={20}
-          className="w-[clamp(1rem,2vw,1.25rem)] h-auto fill-white pt-0.5"
+          className="w-[clamp(1rem,2vw,1.25rem)] fill-white"
+          strokeWidth={3}
         />
         Játék Indítása
       </button>

@@ -17,13 +17,13 @@ export const Badge = ({ text, className = "" }: BadgeProps) => {
     `}
   >
     <span className="
-      text-purple-300
+      text-purple-300 font-lilita
       flex justify-center items-center 
       font-extrabold 
       text-[clamp(0.625rem,1.2vw,0.8rem)] 
       text-center uppercase 
-      tracking-[0.15em]
-      leading-none
+      tracking-[0.2em]
+      leading-none pt-0.5
     ">
       {text}
     </span>

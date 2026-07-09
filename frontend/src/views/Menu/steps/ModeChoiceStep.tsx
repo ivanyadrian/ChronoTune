@@ -20,7 +20,7 @@ export const ModeChoiceStep = ({
     <Badge text="Ready to Play?" />
 
     <div className="space-y-[clamp(0.5rem,1.5vw,1rem)] text-center">
-      <h1 className="text-fluid-h1 font-black text-white tracking-tighter leading-[1.1]">
+      <h1 className="text-fluid-h1 font-archivo text-white tracking-tighter leading-[1.1]">
         Játékmód <br className="sm:hidden" /> kiválasztása
       </h1>
       <p className="text-slate-400 text-fluid-p max-w-[45ch] mx-auto leading-relaxed">
@@ -62,7 +62,7 @@ export const ModeChoiceStep = ({
 
 const ConnectionStatus = ({ isConnected }: { isConnected: boolean }) => (
   <div className="absolute top-[clamp(1rem,3%,1.5rem)] right-[clamp(1rem,3%,1.5rem)] z-20">
-    <div className={`px-3 py-1.5 rounded-full text-[clamp(0.6rem,1vw,0.7rem)] font-black border backdrop-blur-md flex 
+    <div className={`px-3 py-1.5 rounded-full text-[clamp(0.6rem,1vw,0.7rem)] font-archivo border backdrop-blur-md flex 
       items-center gap-2 ${isConnected ? "border-green-500/30 text-green-500 bg-green-500/10" : "border-red-500/30 text-red-500 bg-red-500/10"}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
       {isConnected ? "ONLINE" : "OFFLINE"}

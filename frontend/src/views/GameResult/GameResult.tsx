@@ -118,7 +118,7 @@ export const GameResultView = ({
                 </p>
               ) : (
                 <div className="relative group mx-auto">
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-3">
+                  <label className="block text-[10px] font-archivo text-slate-500 uppercase tracking-[0.3em] mb-3">
                     Játékos kiválasztása
                   </label>
                   <div className="relative">
@@ -164,7 +164,7 @@ export const GameResultView = ({
                 <p className="text-zinc-400 text-[10px] md:text-sm mb-2">
                   PONTSZÁM
                 </p>
-                <p className="text-3xl md:text-4xl font-bold text-secondary-light">
+                <p className="text-3xl md:text-4xl font-archivo text-secondary-light">
                   {activePlayer.score}
                 </p>
               </div>
@@ -174,7 +174,7 @@ export const GameResultView = ({
                 <p className="text-zinc-400 text-[10px] md:text-sm mb-2">
                   TIMELINE HOSSZA
                 </p>
-                <p className="text-3xl md:text-4xl font-bold text-blue-400">
+                <p className="text-3xl md:text-4xl font-archivo text-blue-400">
                   {activePlayer.timeline.length}
                 </p>
               </div>
@@ -186,14 +186,14 @@ export const GameResultView = ({
                 </p>
                 <div className="flex items-baseline gap-1">
                   <span
-                    className={`text-3xl md:text-4xl font-bold ${
+                    className={`text-3xl md:text-4xl font-archivo ${
                       maxMistakes != null ? mistakeColor : "text-red-400"
                     }`}
                   >
                     {currentMistakes}
                   </span>
                   {maxMistakes != null && (
-                    <span className="text-lg text-zinc-500 mb-1">
+                    <span className="text-lg text-zinc-500 mb-1 font-archivo">
                       / {maxMistakes}
                     </span>
                   )}

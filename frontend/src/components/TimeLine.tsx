@@ -210,10 +210,10 @@ export const TimeLine = ({
         <div className="flex flex-nowrap items-center justify-center min-w-max px-40 relative">
           {/* Horizontal axis line */}
           <div className="absolute h-0.5 bg-white/10 w-full left-0 -z-10 flex justify-between items-center">
-            <span className="text-[10px] font-black text-slate-600 tracking-widest uppercase -translate-y-1/2 pl-1">
+            <span className="text-[10px] font-archivo text-slate-600 tracking-widest uppercase -translate-y-1/2 pl-1">
               Start
             </span>
-            <span className="text-[10px] font-black text-slate-600 tracking-widest uppercase -translate-y-1/2 pr-1">
+            <span className="text-[10px] font-archivo text-slate-600 tracking-widest uppercase -translate-y-1/2 pr-1">
               End
             </span>
           </div>
@@ -258,7 +258,7 @@ export const TimeLine = ({
                     onClick={() => toggleCollapse(block.start)}
                     className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto
                    px-4 py-1.5 rounded-full bg-[#0a050f] border border-primary 
-                   text-primary text-[10px] font-black uppercase tracking-widest
+                   text-primary text-[10px] font-archivo uppercase tracking-widest
                    hover:scale-110 active:scale-95 transition-all
                    flex items-center gap-2 shadow-[0_0_20px] shadow-primary/20"
                   >
@@ -344,7 +344,7 @@ export const TimeLine = ({
                           </div>
                         </div>
 
-                        <span className="absolute top-4/5 text-[7px] sm:text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                        <span className="absolute top-4/5 text-[7px] sm:text-[9px] font-archivo text-slate-500 uppercase tracking-[0.2em]">
                           Place Here
                         </span>
                       </div>

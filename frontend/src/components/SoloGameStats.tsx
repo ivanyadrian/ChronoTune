@@ -28,18 +28,18 @@ const SoloGameStats: React.FC<SoloGameStatsProps> = ({
   return (
     <div className="w-full flex flex-col border-b-2 border-white/10 py-3 px-4 bg-black/30">
       {isSolo && me && (
-        <div className="flex flex-wrap xxs:grid xxs:grid-cols-3 items-center w-full gap-y-4 xxs:gap-0 min-h-10">
+        <div className="flex flex-wrap xs:grid xs:grid-cols-3 items-center w-full gap-y-4 xs:gap-0 min-h-10">
           {/* 1. BLOCK: Turn (Top left on mobile, left side on desktop) */}
-          <div className="flex w-1/2 xxs:w-full justify-start order-1">
+          <div className="flex w-1/2 xs:w-full justify-start order-1">
             <div className="flex flex-col items-start justify-center">
-              <span className="text-[8px] sm:text-xxs uppercase font-black tracking-[0.2em] text-white/40">
+              <span className="text-[8px] sm:text-xxs uppercase font-archivo tracking-[0.2em] text-white/40">
                 FORDULÓ
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-2xl sm:text-4xl font-black text-white drop-shadow-lg">
+                <span className="text-2xl sm:text-4xl font-archivo text-white drop-shadow-lg">
                   {Math.min(me.attempts + 1, targetLength)}
                 </span>
-                <span className="text-lg sm:text-2xl font-bold text-white/25">
+                <span className="text-lg sm:text-2xl font-archivo text-white/25">
                   /{targetLength}
                 </span>
               </div>
@@ -47,17 +47,17 @@ const SoloGameStats: React.FC<SoloGameStatsProps> = ({
           </div>
 
           {/* 2. BLOCK: Leave Game & Lives (Top right on mobile, right side on desktop) */}
-          <div className="flex flex-col items-end gap-2 shrink-0 w-1/2 xxs:w-full justify-center xxs:justify-end order-2 xxs:order-3">
+          <div className="flex flex-col items-end gap-2 shrink-0 w-1/2 xs:w-full justify-center xs:justify-end order-2 xs:order-3">
             <div className="order-1">
               <LeaveGameButton onConfirm={onLeaveGame} />
             </div>
           </div>
 
           {/* 3. BLOCK: Score & Combo (Bottom center on mobile, center column on desktop) */}
-          <div className="flex flex-col items-center justify-center gap-2 shrink-0 w-full xxs:w-full order-3 xxs:order-2">
+          <div className="flex flex-col items-center justify-center gap-2 shrink-0 w-full xs:w-full order-3 xs:order-2">
             {maxMistakes !== null && (
               <div className="flex flex-col items-end gap-1 order-2">
-                <div className="flex gap-1 xxs:gap-1.5">
+                <div className="flex gap-1 xs:gap-1.5">
                   {Array.from({ length: maxMistakes }).map((_, i) => (
                     <Heart
                       key={i}
@@ -78,26 +78,26 @@ const SoloGameStats: React.FC<SoloGameStatsProps> = ({
               </div>
             )}
 
-            <div className="flex items-stretch rounded-full overflow-hidden bg-white/10 border border-white/10 h-8 xxs:h-10 shrink-0">
+            <div className="flex items-stretch rounded-full overflow-hidden bg-white/10 border border-white/10 h-8 xs:h-10 shrink-0">
               {/* LEFT: Static label */}
               <div className="flex items-center px-3">
-                <span className="text-[9px] sm:text-xs uppercase tracking-[0.2em] text-white/40 font-black">
+                <span className="text-[9px] sm:text-xs uppercase tracking-[0.2em] text-white/40 font-archivo">
                   Pontszám
                 </span>
               </div>
 
               {/* CENTER: This is where the switch takes place */}
-              <div className="flex items-center justify-end w-20 px-3 xxs:px-4 tabular-nums">
+              <div className="flex items-center justify-end w-20 px-3 xs:px-4 tabular-nums">
                 {displayDelta !== 0 ? (
                   /* If there is a delta (points gained/lost), it takes its place */
                   <span
-                    className={`text-lg sm:text-2xl font-black italic drop-shadow-[0_0_8px_rgba(74,222,128,0.4)] ${displayDelta > 0 ? "text-green-400" : "text-red-400"}`}
+                    className={`text-lg sm:text-2xl font-archivo italic drop-shadow-[0_0_8px_rgba(74,222,128,0.4)] ${displayDelta > 0 ? "text-green-400" : "text-red-400"}`}
                   >
                     {displayDelta > 0 ? `+${displayDelta}` : displayDelta}
                   </span>
                 ) : (
                   /* By default, the total score is displayed */
-                  <span className="text-lg sm:text-2xl font-black italic text-white">
+                  <span className="text-lg sm:text-2xl font-archivo italic text-white">
                     {me.score}
                   </span>
                 )}
@@ -128,7 +128,7 @@ const StreakBadge: React.FC<{ winStreak: number; loseStreak: number }> = ({
 
   return (
     <div
-      className={`flex items-center justify-center gap-[0.25em] font-black transition-all duration-300
+      className={`flex items-center justify-center gap-[0.25em] font-archivo transition-all duration-300
         pr-2 pl-1 sm:pr-2 py-0 sm:py-0.5
         text-[1em] sm:text-[1.15em]
         ${
