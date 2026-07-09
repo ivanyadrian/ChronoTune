@@ -29,6 +29,7 @@ export const MusicPlayer = ({
   const [isReady, setIsReady] = useState(false);
   const canControl = !syncMusic || isMyTurn;
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Volume states
   const [volume, setVolume] = useState<number>(() => {
@@ -37,6 +38,26 @@ export const MusicPlayer = ({
   });
   const [previousVolume, setPreviousVolume] = useState<number>(volume);
   const [isMuted, setIsMuted] = useState(false);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640 || 'ontouchstart' in window);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Set volume to max on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setVolume(100);
+      setIsMuted(false);
+      localStorage.setItem("chronotune-volume", "100");
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     const fetchFreshPreview = async () => {
@@ -215,7 +236,7 @@ export const MusicPlayer = ({
                       />
                     </defs>
 
-                    <text className="fill-white/60 text-[12px] font-black tracking-wider uppercase opacity-10">
+                    <text className="fill-white/60 text-[12px] font-archivo tracking-wider uppercase opacity-10">
                       <textPath href="#circlePath" startOffset="50%">
                         CHRONOTUNE
                       </textPath>
@@ -242,7 +263,7 @@ export const MusicPlayer = ({
           {/* 2. CONTROLS (Timeline + Buttons) */}
           <div className="grow w-full flex flex-col items-center gap-5 sm:gap-6">
             <div className="w-full space-y-2">
-              <div className="flex justify-between text-[11px] sm:text-[13px] font-black text-white tabular-nums">
+              <div className="flex justify-between text-[11px] sm:text-[13px] font-archivo text-white tabular-nums">
                 <span>
                   0:
                   {Math.floor((progress / 100) * 30)
@@ -325,82 +346,84 @@ export const MusicPlayer = ({
             </div>
           </div>
 
-          {/* 3. Volume Control */}
-          <div className="flex sm:flex-col items-center gap-4 sm:gap-3 px-4 py-3 sm:px-3 sm:py-4 bg-bg-dark/50 backdrop-blur-sm rounded-full border border-secondary/10 w-full sm:w-auto shrink-0">
-            <div
-              className="relative h-2 sm:h-20 w-full sm:w-2 flex justify-center cursor-pointer touch-none"
-              onMouseDown={(mouseDownEvent) => {
-                mouseDownEvent.stopPropagation();
-                mouseDownEvent.preventDefault();
-                const container = mouseDownEvent.currentTarget;
-                const updateVolume = (clientXOrY: number) => {
-                  const rect = container.getBoundingClientRect();
-                  let percentage;
-                  if (window.innerWidth < 640) {
-                    const relativeX = clientXOrY - rect.left;
-                    percentage = (relativeX / rect.width) * 100;
-                  } else {
-                    const relativeY = rect.bottom - clientXOrY;
-                    percentage = (relativeY / rect.height) * 100;
-                  }
-                  const newVolume = Math.round(
-                    Math.max(0, Math.min(100, percentage)),
-                  );
-                  handleVolumeChange({ target: { value: newVolume } });
-                };
-                updateVolume(
-                  window.innerWidth < 640
-                    ? mouseDownEvent.clientX
-                    : mouseDownEvent.clientY,
-                );
-                const onMouseMove = (moveEvent: MouseEvent) =>
+          {/* 3. Volume Control - ONLY ON DESKTOP */}
+          {!isMobile && (
+            <div className="flex sm:flex-col items-center gap-4 sm:gap-3 px-4 py-3 sm:px-3 sm:py-4 bg-bg-dark/50 backdrop-blur-sm rounded-full border border-secondary/10 w-full sm:w-auto shrink-0">
+              <div
+                className="relative h-2 sm:h-20 w-full sm:w-2 flex justify-center cursor-pointer touch-none"
+                onMouseDown={(mouseDownEvent) => {
+                  mouseDownEvent.stopPropagation();
+                  mouseDownEvent.preventDefault();
+                  const container = mouseDownEvent.currentTarget;
+                  const updateVolume = (clientXOrY: number) => {
+                    const rect = container.getBoundingClientRect();
+                    let percentage;
+                    if (window.innerWidth < 640) {
+                      const relativeX = clientXOrY - rect.left;
+                      percentage = (relativeX / rect.width) * 100;
+                    } else {
+                      const relativeY = rect.bottom - clientXOrY;
+                      percentage = (relativeY / rect.height) * 100;
+                    }
+                    const newVolume = Math.round(
+                      Math.max(0, Math.min(100, percentage)),
+                    );
+                    handleVolumeChange({ target: { value: newVolume } });
+                  };
                   updateVolume(
                     window.innerWidth < 640
-                      ? moveEvent.clientX
-                      : moveEvent.clientY,
+                      ? mouseDownEvent.clientX
+                      : mouseDownEvent.clientY,
                   );
-                const onMouseUp = () => {
-                  document.removeEventListener("mousemove", onMouseMove);
-                  document.removeEventListener("mouseup", onMouseUp);
-                };
-                document.addEventListener("mousemove", onMouseMove);
-                document.addEventListener("mouseup", onMouseUp);
-              }}
-            >
-              <div className="absolute inset-0 bg-white/5 rounded-full overflow-hidden" />
-              <div
-                className="absolute bottom-0 left-0 bg-linear-to-r sm:bg-linear-to-t from-[color-mix(in_srgb,var(--primary)_40%,black)] to-(--primary) rounded-full transition-all duration-75 ease-out"
-                style={{
-                  height:
-                    window.innerWidth < 640 ? "100%" : `${displayVolume}%`,
-                  width: window.innerWidth < 640 ? `${displayVolume}%` : "100%",
+                  const onMouseMove = (moveEvent: MouseEvent) =>
+                    updateVolume(
+                      window.innerWidth < 640
+                        ? moveEvent.clientX
+                        : moveEvent.clientY,
+                    );
+                  const onMouseUp = () => {
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
+                  };
+                  document.addEventListener("mousemove", onMouseMove);
+                  document.addEventListener("mouseup", onMouseUp);
                 }}
-              />
-            </div>
+              >
+                <div className="absolute inset-0 bg-white/5 rounded-full overflow-hidden" />
+                <div
+                  className="absolute bottom-0 left-0 bg-linear-to-r sm:bg-linear-to-t from-[color-mix(in_srgb,var(--primary)_40%,black)] to-(--primary) rounded-full transition-all duration-75 ease-out"
+                  style={{
+                    height:
+                      window.innerWidth < 640 ? "100%" : `${displayVolume}%`,
+                    width: window.innerWidth < 640 ? `${displayVolume}%` : "100%",
+                  }}
+                />
+              </div>
 
-            {/* Mute button - instead of Volume2 */}
-            <button
-              onClick={toggleMute}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="focus:outline-none transition-all hover:scale-110 active:scale-95"
-              aria-label={isMuted ? "Hang visszakapcsolása" : "Némítás"}
-            >
-              {isMuted ? (
-                <VolumeX
-                  className={`w-5 h-5 transition-colors text-secondary-light`}
-                />
-              ) : (
-                <Volume2
-                  className={`w-5 h-5 transition-colors ${volume > 0 ? "text-white" : "text-slate-600"}`}
-                />
-              )}
-            </button>
-          </div>
+              {/* Mute button */}
+              <button
+                onClick={toggleMute}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="focus:outline-none transition-all hover:scale-110 active:scale-95"
+                aria-label={isMuted ? "Hang visszakapcsolása" : "Némítás"}
+              >
+                {isMuted ? (
+                  <VolumeX
+                    className={`w-5 h-5 transition-colors text-secondary-light`}
+                  />
+                ) : (
+                  <Volume2
+                    className={`w-5 h-5 transition-colors ${volume > 0 ? "text-white" : "text-slate-600"}`}
+                  />
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 sm:mt-3 text-center border-t border-white/5 pt-4">
-          <p className="text-[clamp(7px,1.5vw,10px)] font-black text-slate-500 uppercase tracking-[0.2em] opacity-80">
-            {canControl ? "Húzd a kártyát a megfelelő helyre!" : "\u00A0"}
+          <p className="text-[clamp(7px,1.5vw,10px)] font-archivo text-slate-500 uppercase tracking-[0.2em] opacity-80">
+            {canControl ? "Helyezd a kártyát a megfelelő helyre!" : "\u00A0"}
           </p>
         </div>
 
