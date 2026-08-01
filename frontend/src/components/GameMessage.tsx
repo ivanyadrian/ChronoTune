@@ -8,9 +8,10 @@ interface GameMessageProps {
   countdown: number | null;
   nextPlayerName?: string | null;
   alwaysVisible?: boolean;
+  isWeekly?: boolean;
 }
 
-export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
+export const GameMessage = ({ message, nextPlayerName, isWeekly }: GameMessageProps) => {
   if (!message) return null;
 
   const isInformation =
@@ -54,7 +55,7 @@ export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
             >
               {message.text}
             </h2>
-            {message.status === "success" &&
+            {!isWeekly && message.status === "success" &&
               message.pointsEarned !== undefined &&
               message.pointsEarned > 0 && (
                 <div className="animate-in zoom-in-50 duration-500 delay-200 flex items-center gap-3">
@@ -81,7 +82,7 @@ export const GameMessage = ({ message, nextPlayerName }: GameMessageProps) => {
                   </span>
                 </div>
               )}
-            {message.status === "error" &&
+            {!isWeekly && message.status === "error" &&
               message.pointsEarned !== undefined && (
                 <div className="animate-in zoom-in-50 duration-500 delay-200 flex items-center gap-3">
                   <div className="text-4xl sm:text-6xl font-archivo italic drop-shadow-[0_0_20px_rgba(239,68,68,0.5)] flex items-center gap-4">

@@ -130,6 +130,7 @@ function App() {
           message={gameMessage}
           countdown={countdown}
           alwaysVisible={true}
+          isWeekly={isWeekly}
         />
 
         {winner && (
