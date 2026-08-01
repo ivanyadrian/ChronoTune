@@ -17,13 +17,13 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => (
       <Badge text="Musical Timeline Challenge" />
 
       <div className="space-y-4 text-center">
-        <h1 className="text-[clamp(2.35rem,10vw,3.75rem)] font-archivo text-white tracking-tighter leading-none pl-2">
+        <h1 className="text-fluid-h1 font-archivo text-white tracking-tighter leading-none pl-2">
           Chrono
           <span className="bg-linear-to-r from-(--secondary-light) to-(--secondary) bg-clip-text text-transparent pr-2">
             Tune
           </span>
         </h1>
-        <p className="text-slate-400 text-[clamp(0.7rem,2vw,0.875rem)] leading-relaxed max-w-[45ch] mx-auto">
+        <p className="text-slate-400 text-fluid-p leading-relaxed max-w-[45ch] mx-auto">
           Úgy érzed, hogy a zenei ismereted magas? Képes vagy csupán
           hangból megállapítani az évet?
         </p>
@@ -45,7 +45,7 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => (
                 onNext();
               }
             }}
-            className="font-extrabold w-full text-[clamp(1rem,2vw,1.125rem)] p-[clamp(0.75rem,2vw,1rem)] bg-transparent border-none outline-none text-white placeholder:text-slate-700 tracking-wider"
+            className="font-extrabold w-full text-fluid-h4 p-[clamp(0.75rem,2vw,1rem)] bg-transparent border-none outline-none text-white placeholder:text-slate-700 tracking-wider"
           />
         </div>
 
@@ -65,7 +65,7 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => (
         </button>
       </div>
 
-      <p className="text-[clamp(0.65rem,1.2vw,0.75rem)] mt-[clamp(0.5rem,2vw,1rem)] text-slate-600 italic text-center mx-auto">
+      <p className="text-fluid-badge mt-[clamp(0.5rem,2vw,1rem)] text-slate-600 italic text-center mx-auto">
         Nincs szükség regisztrációra, a név csupán azonosításhoz szükséges.
       </p>
     </div>

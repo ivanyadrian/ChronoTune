@@ -1,4 +1,4 @@
-import { User, Users } from "lucide-react";
+import { User, Users, Calendar } from "lucide-react";
 import { Badge } from "../../../components/ui/Badge";
 import ModeCard from "../../../components/ui/ModeCard";
 import BackButton from "../../../components/ui/BackButton";
@@ -7,6 +7,7 @@ interface ModeChoiceStepProps {
   isConnected: boolean;
   onSelectSolo: () => void;
   onSelectMulti: () => void;
+  onSelectWeekly: () => void;
   onBack: () => void;
 }
 
@@ -14,6 +15,7 @@ export const ModeChoiceStep = ({
   isConnected,
   onSelectSolo,
   onSelectMulti,
+  onSelectWeekly,
   onBack,
 }: ModeChoiceStepProps) => (
   <div className="flex flex-col items-center max-w-5xl mx-auto py-[clamp(1.5rem,5vw,3rem)] space-y-[clamp(2rem,6vw,4rem)] @container">
@@ -34,24 +36,37 @@ export const ModeChoiceStep = ({
         title="Egyjátékos"
         desc="Tedd próbára magad egyedül az idővel szemben. Helyezd el a kártyákat sorrendben!"
         icon={User}
-        img="/img/singleplayer_cover.jpg"
+        img="/img/singleplayer_cover.webp"
         imgAlt="Egyjátékos mód borítókép"
         onClick={onSelectSolo}
-        accentColor="purple"
-        titleColor="text-white"
+        accentColor="cyan"
       />
 
       <ModeCard
         title="Többjátékos"
         desc="Hívd ki a barátaidat online, és derítsétek ki, ki a zenei zseni a csapatban!"
         icon={Users}
-        img="/img/multiplayer_cover.jpg"
+        img="/img/multiplayer_cover.webp"
         imgAlt="Többjátékos mód borítókép"
         onClick={onSelectMulti}
         accentColor="pink"
-        titleColor="text-primary"
-        status=<ConnectionStatus isConnected={isConnected} />
+        status={<ConnectionStatus isConnected={isConnected} />}
       />
+
+      {/* Weekly Challenge Mode Card – full width row, centered */}
+      <div className="col-span-1 @[40rem]:col-span-2 flex justify-center w-full">
+        <div className="flex justify-center w-full @[40rem]:w-[calc(70%-clamp(1rem,3vw,1.5rem)/2)]">
+          <ModeCard
+            title="Heti Kihívás"
+            desc="Minden héten új 20 dal. Legyél minél pontosabb, minél gyorsabb és kerülj fel a heti ranglistára!"
+            icon={Calendar}
+            img="/img/weekly_challenge_cover.webp"
+            imgAlt="Heti kihívás mód borítókép"
+            onClick={onSelectWeekly}
+            accentColor="yellow"
+          />
+        </div>
+      </div>
     </div>
 
     <div className="pt-4">

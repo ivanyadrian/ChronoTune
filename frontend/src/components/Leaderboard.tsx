@@ -1,6 +1,7 @@
 import { Zap } from "lucide-react";
 import { socket } from "../socket";
 import type { Player } from "../types";
+import { getPlayerRank } from "../utils/rankUtils";
 
 interface LeaderboardProps {
   players: Player[];
@@ -23,15 +24,7 @@ export const Leaderboard = ({
       ? players[(currentTurnIndex + 1) % players.length]
       : null;
 
-  // Helper function to determine rank: identical scores get identical rank
-  const getPlayerRank = (index: number) => {
-    for (let i = 0; i < index; i++) {
-      if (sortedPlayers[i].score === sortedPlayers[index].score) {
-        return i + 1;
-      }
-    }
-    return index + 1;
-  };
+
 
   return (
     <div className="w-full h-full max-w-sm md:max-w-2xl lg:max-w-md flex flex-col md:flex-row lg:flex-col gap-2 md:gap-3 justify-center lg:justify-start items-center">
@@ -40,7 +33,7 @@ export const Leaderboard = ({
         const delta = lastDelta[player.id] || 0;
         const isCurrent = player.id === currentTurnId;
         const isNext = nextPlayer ? player.id === nextPlayer.id : false;
-        const rank = getPlayerRank(index);
+        const rank = getPlayerRank(index, sortedPlayers);
 
         const shouldShowOnMobileOrTablet = isCurrent || isNext;
 

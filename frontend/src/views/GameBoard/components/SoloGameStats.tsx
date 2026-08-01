@@ -1,7 +1,7 @@
 import React from "react";
 import { Heart, Flame } from "lucide-react";
-import type { Player } from "../types";
-import LeaveGameButton from "./ui/LeaveGameButton";
+import type { Player } from "../../../types";
+import LeaveGameButton from "../../../components/ui/LeaveGameButton";
 
 interface SoloGameStatsProps {
   isSolo: boolean;

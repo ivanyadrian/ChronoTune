@@ -15,6 +15,7 @@ export interface Player {
   name: string;
   timeline: Song[];
   mistakes: number;
+  correctPlacements: number;
   attempts: number;
   personalDeck: Song[];
   score: number;
@@ -35,4 +36,11 @@ export interface Room {
   activeCard?: Song;
   playbackState: number;
   currentPlayingDeezerId: string | null;
+  isWeekly?: boolean;
+  weeklyElapsedMs?: number;
+  sessionStartTime?: number;
+  weekIdentifier?: string;
+  weeklyRunId?: string;
+  fingerprint?: string;
+  weeklySessionToken?: string;
 }

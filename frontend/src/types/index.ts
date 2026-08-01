@@ -58,6 +58,10 @@ export interface GameStartedData {
   maxMistakes: number | null;
   targetLength?: number;
   isSolo: boolean;
+  isWeekly?: boolean;
+  weekIdentifier?: string;
+  runId?: string;
+  weeklyElapsedMs?: number;
 }
 
 export interface RoomConfigData {
@@ -65,3 +69,5 @@ export interface RoomConfigData {
   maxMistakes: number | null;
   syncMusic: boolean;
 }
+
+export * from "./game";

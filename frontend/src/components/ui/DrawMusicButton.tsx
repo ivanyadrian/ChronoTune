@@ -40,11 +40,11 @@ export const DrawMusicButton = ({
           <div className="absolute inset-0 bg-linear-to-b from-white/5 to-transparent opacity-50" />
 
           <div className="relative z-10 flex flex-col items-center">
-            <span className="text-white font-archivo text-[clamp(1.5rem,4vw,2.2rem)] uppercase italic tracking-tighter leading-none">
+            <span className="text-white font-archivo text-fluid-h2 uppercase italic tracking-tighter leading-none">
               {waitingForName ? "Várakozás" : "Új dal"}
             </span>
 
-            <span className="text-primary font-archivo uppercase tracking-widest mt-2 opacity-90 text-[clamp(0.75rem,2.2vw,1rem)]">
+            <span className="text-primary font-archivo uppercase tracking-widest mt-2 opacity-90 text-fluid-badge">
               {waitingForName
                 ? `${waitingForName.length > 8 ? `${waitingForName.slice(0, 8)}...` : waitingForName} köre`
                 : "Húzása a pakliból"}

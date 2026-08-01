@@ -145,7 +145,7 @@ export const SoloConfigStep = ({
       <button
         disabled={!userName.trim() || selectedMaxMistakes === undefined}
         onClick={onStart}
-        className="font-archivo p-[clamp(0.85rem,2.5vw,1.15rem)] text-[clamp(0.875rem,1.5vw,1rem)] mt-[clamp(2rem,6vw,2.5rem)] w-full rounded-full bg-primary text-white flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)] tracking-widest uppercase transition-all hover:brightness-110 hover:shadow-[0_0_20px_3px] hover:scale-102 active:scale-98 hover:shadow-primary/40 disabled:opacity-30 disabled:grayscale"
+        className="font-archivo p-[clamp(0.85rem,2.5vw,1.15rem)] text-fluid-p mt-[clamp(2rem,6vw,2.5rem)] w-full rounded-full bg-primary text-white flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)] tracking-widest uppercase transition-all hover:brightness-110 hover:shadow-[0_0_20px_3px] hover:scale-102 active:scale-98 hover:shadow-primary/40 disabled:opacity-30 disabled:grayscale"
       >
         <Play
           size={20}

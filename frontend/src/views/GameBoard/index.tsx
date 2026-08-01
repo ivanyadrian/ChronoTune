@@ -3,13 +3,14 @@ import type { Player, Song } from "../../types";
 import { MusicPlayer } from "../../components/MusicPlayer";
 import { TimeLine } from "../../components/TimeLine";
 import { Leaderboard } from "../../components/Leaderboard";
-import SoloGameStats from "../../components/SoloGameStats";
-import MultiplayerGameStats from "../../components/MultiplayerGameStats";
-import { DrawMusicButton } from "../../components/ui/DrawMusicButtom";
+import SoloGameStats from "../GameBoard/components/SoloGameStats";
+import MultiplayerGameStats from "../GameBoard/components/MultiplayerGameStats";
+import { DrawMusicButton } from "../../components/ui/DrawMusicButton";
 import { useDragAndDrop } from "./hooks/useDragAndDrop";
 import { useMusicSync } from "./hooks/useMusicSync";
 import { DiscardConfirmModal } from "./components/DiscardConfirmModal";
 import { FloatingDragGhost } from "./components/FloatingDragGhost";
+import WeeklyChallengeStats from "../WeeklyChallenge/components/WeeklyChallengeStats";
 
 // NEW, GROUPED INTERFACE
 interface GameBoardProps {
@@ -22,6 +23,8 @@ interface GameBoardProps {
     maxMistakes: number | null;
     targetLength: number;
     isSolo: boolean;
+    isWeekly: boolean;
+    weeklyElapsedMs: number;
     syncMusic: boolean;
     roomCode: string | null;
     musicPlaybackState: number;
@@ -50,6 +53,8 @@ export const GameBoard = ({ gameState, actions, socketId }: GameBoardProps) => {
     maxMistakes,
     targetLength,
     isSolo,
+    isWeekly,
+    weeklyElapsedMs,
     syncMusic,
     roomCode,
     musicPlaybackState,
@@ -129,22 +134,35 @@ export const GameBoard = ({ gameState, actions, socketId }: GameBoardProps) => {
         }}
       />
 
-      <SoloGameStats
-        isSolo={isSolo}
-        me={me}
-        delta={delta}
-        targetLength={targetLength}
-        maxMistakes={maxMistakes}
-        onLeaveGame={onLeaveGame}
-      />
-
-      {!isSolo && activePlayer && (
-        <MultiplayerGameStats
-          activePlayer={activePlayer}
-          isMyTurn={isMyTurn}
+      {/* STATS HANDLING */}
+      {isWeekly ? (
+        // 1. Rendered during Weekly Challenge
+        <WeeklyChallengeStats
+          me={me}
           targetLength={targetLength}
           onLeaveGame={onLeaveGame}
+          initialElapsedMs={weeklyElapsedMs}
         />
+      ) : isSolo ? (
+        // 2. Rendered during standard solo mode
+        <SoloGameStats
+          isSolo={isSolo}
+          me={me}
+          delta={delta}
+          targetLength={targetLength}
+          maxMistakes={maxMistakes}
+          onLeaveGame={onLeaveGame}
+        />
+      ) : (
+        // 3. Rendered during multiplayer mode
+        activePlayer && (
+          <MultiplayerGameStats
+            activePlayer={activePlayer}
+            isMyTurn={isMyTurn}
+            targetLength={targetLength}
+            onLeaveGame={onLeaveGame}
+          />
+        )
       )}
 
       <div className={!isSolo ? "grid grid-cols-1 lg:grid-cols-12 items-start" : "flex"}>
@@ -195,6 +213,7 @@ export const GameBoard = ({ gameState, actions, socketId }: GameBoardProps) => {
                 isDraggable={isMyTurn && pendingIndex === null}
                 canDiscard={isMyTurn}
                 onDiscard={() => setShowDiscardConfirm(true)}
+                isWeekly={isWeekly}
               />
             )}
 

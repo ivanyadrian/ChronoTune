@@ -92,7 +92,7 @@ useEffect(() => {
   return (
     <div className="w-full max-w-6xl my-8 px-3 xs:px-6 rounded-3xl flex flex-col items-center gap-6">
       <Badge text="Lobby" />
-      <h2 className="text-[clamp(2.5rem,8vw,4rem)] font-mono font-extrabold text-white tracking-wide leading-none">
+      <h2 className="text-fluid-h1 font-mono font-extrabold text-white tracking-wide leading-none">
         {roomCode}
       </h2>
 
@@ -263,7 +263,7 @@ useEffect(() => {
               className="p-3.5 font-archivo sm:p-4 bg-primary w-full rounded-full mt-7 sm:mt-10 text-white font-bold flex items-center justify-center gap-2 tracking-widest uppercase hover:brightness-110 hover:scale-102 hover:shadow-[0_0_20px_3px_rgba(239,77,255,0.4)] active:scale-105 transition-all disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
             >
               <Play size={18} className="fill-white sm:w-5 sm:h-5" />
-              <span className="text-[clamp(0.875rem,1.5vw,1rem)]">
+              <span className="text-fluid-p">
                 Játék Indítása
               </span>
             </button>

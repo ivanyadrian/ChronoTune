@@ -38,6 +38,7 @@ async function getDeezerData(artist, title) {
 
         return {
             deezerId: track.id.toString(),
+            preview: track.preview,
             fullDate: trackData.release_date,
             cover: trackData.album.cover_big,
         };
@@ -75,6 +76,11 @@ async function start() {
             continue;
         }
 
+        if (!details.preview) {
+            console.log("❌ Nincs preview");
+            return null;
+        }
+
         // Deezer ID alapján
         if (seenIds.has(details.deezerId)) {
             console.log(`⚠️ Duplikátum (Deezer ID: ${details.deezerId})`);
@@ -101,6 +107,7 @@ async function start() {
             artist: s.artist,
             title: s.title,
             deezerId: details.deezerId,
+            preview: details.preview,
             cover: details.cover,
             fullDate: details.fullDate,
             year,

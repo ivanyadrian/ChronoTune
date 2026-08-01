@@ -1,15 +1,33 @@
 import { Server, Socket } from "socket.io";
-import type { Room } from "../types.js";
-import  hungarianSongs from "../data/songs.json" with { type: "json" };
+import type { Room, Song } from "../types.js";
+import hungarianSongs from "../data/songs.json" with { type: "json" };
 import { shuffle } from "../utils/shuffle.js";
-import type { Song } from "../types.js";
 import { PLAYBACK_STATE } from "../constants/index.js";
+import { WeeklyChallenge } from "../db.js";
+import {
+  getWeekIdentifier,
+  startWeeklyRun,
+  pauseWeeklyRun,
+  updateWeeklyRunState,
+} from "../services/weeklyService.js";
+
+interface CreateRoomData {
+  userName: string;
+  targetLength: number;
+  isSolo?: boolean;
+  maxMistakes?: number | null;
+  syncMusic?: boolean;
+  isWeekly?: boolean;
+  runId?: string;
+  fingerprint?: string;
+}
 
 const createPlayerObject = (id: string, name: string) => ({
   id,
   name,
   timeline: [],
   mistakes: 0,
+  correctPlacements: 0,
   attempts: 0,
   personalDeck: [],
   score: 0,
@@ -34,7 +52,7 @@ const generatePersonalDeck = (songs: Song[], targetLength: number): Song[] => {
   return deck;
 };
 
-// --- HELPER FUNCTION: Find which room a given socket belongs to ---
+// Helper function: Find which room a given socket belongs to
 const findRoomBySocketId = (
   socketId: string,
   roomsData: Record<string, Room>,
@@ -45,6 +63,244 @@ const findRoomBySocketId = (
     }
   }
   return null;
+};
+
+// Generate a unique 4-character room code
+const generateUniqueRoomCode = (roomsData: Record<string, Room>): string => {
+  let code: string;
+  do {
+    code = Math.random().toString(36).substring(2, 6).toUpperCase();
+  } while (roomsData[code]);
+  return code;
+};
+
+// Validate incoming room creation payload
+const validateCreateRoomPayload = (
+  socket: Socket,
+  data: CreateRoomData,
+): boolean => {
+  if (
+    !data?.userName ||
+    data.userName.trim().length === 0 ||
+    data.userName.length > 20
+  ) {
+    socket.emit("error", "Érvénytelen felhasználónév!");
+    return false;
+  }
+
+  if (!data.isWeekly) {
+    if (
+      !Number.isInteger(data.targetLength) ||
+      data.targetLength < 3 ||
+      data.targetLength > 30
+    ) {
+      socket.emit("error", "Érvénytelen célhossz!");
+      return false;
+    }
+    if (data.maxMistakes !== undefined && data.maxMistakes !== null) {
+      if (
+        !Number.isInteger(data.maxMistakes) ||
+        data.maxMistakes < 1 ||
+        data.maxMistakes > 10
+      ) {
+        socket.emit("error", "Érvénytelen hibahatár!");
+        return false;
+      }
+    }
+  }
+
+  if (data.syncMusic !== undefined && typeof data.syncMusic !== "boolean") {
+    socket.emit("error", "Érvénytelen szinkronizációs beállítás!");
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Helper: Handle Weekly Challenge room creation & restoration
+ */
+const handleWeeklyRoomCreation = async (
+  socket: Socket,
+  code: string,
+  data: CreateRoomData,
+  roomsData: Record<string, Room>,
+) => {
+  try {
+    const currentWeekId = getWeekIdentifier();
+    const startResult = await startWeeklyRun(
+      data.userName,
+      data.fingerprint || "",
+      data.runId,
+    );
+
+    if (!startResult.success) {
+      socket.emit(
+        "error",
+        startResult.error || "Nem sikerült elindítani a heti kihívást.",
+      );
+      return;
+    }
+
+    const challenge = await WeeklyChallenge.findOne({
+      weekIdentifier: currentWeekId,
+    });
+    if (!challenge) {
+      socket.emit(
+        "error",
+        "A heti kihívás jelenleg nem elérhető! Kérlek várd meg a generálást.",
+      );
+      return;
+    }
+
+    const existingRun = startResult.existingRun;
+    const weeklyElapsedMs = existingRun?.elapsedTimeMs || 0;
+    const sessionStartTime = Date.now();
+
+    const newRoom: Room = {
+      players: [createPlayerObject(socket.id, data.userName)],
+      targetLength: challenge.songs.length - 1,
+      deck: [],
+      gameStarted: true,
+      turnIndex: 0,
+      turnLocked: false,
+      maxMistakes: null,
+      syncMusic: data.syncMusic ?? true,
+      activeCard: undefined,
+      playbackState: PLAYBACK_STATE.STOPPED,
+      currentPlayingDeezerId: null,
+      isWeekly: true,
+      weeklyElapsedMs,
+      sessionStartTime,
+      weekIdentifier: currentWeekId,
+      weeklyRunId: startResult.runId,
+      fingerprint: data.fingerprint || "",
+      weeklySessionToken: startResult.sessionToken,
+    };
+
+    if (
+      existingRun &&
+      existingRun.timeline &&
+      existingRun.timeline.length > 0
+    ) {
+      // Restore saved run state
+      newRoom.players[0].timeline = existingRun.timeline;
+      newRoom.players[0].personalDeck = existingRun.personalDeck || [];
+      newRoom.players[0].mistakes = existingRun.mistakes || 0;
+      newRoom.players[0].correctPlacements = existingRun.correctPlacements || 0;
+      newRoom.players[0].attempts = existingRun.attempts || 0;
+      newRoom.activeCard = existingRun.activeCard || undefined;
+    } else {
+      // Initialize new weekly deck
+      const pDeck = [...challenge.songs];
+      const startCard = pDeck.pop();
+      newRoom.players[0].personalDeck = pDeck;
+      if (startCard) {
+        newRoom.players[0].timeline = [startCard];
+      }
+
+      // Persist initial state
+      updateWeeklyRunState(startResult.runId!, {
+        timeline: newRoom.players[0].timeline,
+        personalDeck: newRoom.players[0].personalDeck,
+        activeCard: undefined,
+        mistakes: 0,
+        correctPlacements: 0,
+        attempts: 0,
+      }).catch((err) => console.error("Hiba az aktív futás mentésekor:", err));
+    }
+
+    roomsData[code] = newRoom;
+
+    socket.emit("game_started", {
+      players: newRoom.players,
+      currentTurn: socket.id,
+      roomCode: code,
+      maxMistakes: newRoom.maxMistakes,
+      targetLength: newRoom.targetLength,
+      isSolo: true,
+      isWeekly: true,
+      weekIdentifier: currentWeekId,
+      runId: startResult.runId,
+      weeklyElapsedMs,
+    });
+
+    if (newRoom.activeCard) {
+      const card = newRoom.activeCard;
+      socket.emit("new_card_drawn", {
+        id: card.id,
+        title: card.title,
+        artist: card.artist,
+        deezerId: card.deezerId,
+        cover: card.cover,
+        userName: newRoom.players[0].name,
+        playerId: socket.id,
+      });
+    }
+  } catch (error) {
+    console.error("Hiba a heti kihívás szoba létrehozásakor:", error);
+    socket.emit("error", "Nem sikerült elindítani a heti kihívást.");
+  }
+};
+
+/**
+ * Helper: Handle Standard (Solo or Multiplayer) room creation
+ */
+const handleStandardRoomCreation = (
+  io: Server,
+  socket: Socket,
+  code: string,
+  data: CreateRoomData,
+  roomsData: Record<string, Room>,
+) => {
+  const maxMistakes = data.maxMistakes !== undefined ? data.maxMistakes : null;
+
+  const newRoom: Room = {
+    players: [createPlayerObject(socket.id, data.userName)],
+    targetLength: data.targetLength,
+    deck: shuffle(hungarianSongs),
+    gameStarted: data.isSolo || false,
+    turnIndex: 0,
+    turnLocked: false,
+    maxMistakes,
+    syncMusic: data.syncMusic ?? true,
+    activeCard: undefined,
+    playbackState: PLAYBACK_STATE.STOPPED,
+    currentPlayingDeezerId: null,
+  };
+
+  roomsData[code] = newRoom;
+
+  if (data.isSolo) {
+    const pDeck = generatePersonalDeck(
+      hungarianSongs,
+      newRoom.targetLength + 1,
+    );
+    newRoom.players[0].personalDeck = pDeck;
+    const startCard = newRoom.players[0].personalDeck.pop();
+    if (startCard) newRoom.players[0].timeline = [startCard];
+
+    socket.emit("game_started", {
+      players: newRoom.players,
+      currentTurn: socket.id,
+      roomCode: code,
+      maxMistakes: newRoom.maxMistakes,
+      targetLength: newRoom.targetLength,
+      isSolo: true,
+    });
+  } else {
+    socket.emit("room_created", code);
+    socket.emit("is_host", true);
+    io.to(code).emit(
+      "update_players",
+      newRoom.players.map((p) => p.name),
+    );
+    socket.emit("room_config_updated", {
+      targetLength: newRoom.targetLength,
+      maxMistakes: newRoom.maxMistakes,
+      syncMusic: newRoom.syncMusic,
+    });
+  }
 };
 
 /**
@@ -77,6 +333,19 @@ export const handleLeaveRoom = (
 
   // If room becomes empty → delete it
   if (room.players.length === 0) {
+    if (
+      room.isWeekly &&
+      room.weeklyRunId &&
+      room.sessionStartTime !== undefined
+    ) {
+      pauseWeeklyRun(
+        room.weeklyRunId,
+        room.sessionStartTime,
+        room.weeklyElapsedMs || 0,
+      ).catch((err) =>
+        console.error("Hiba a heti futás szüneteltetésekor:", err),
+      );
+    }
     delete roomsData[roomCode];
     return;
   }
@@ -96,7 +365,6 @@ export const handleLeaveRoom = (
   }
 
   if (room.gameStarted) {
-    // Fix turnIndex
     if (playerIndex < room.turnIndex) {
       room.turnIndex--;
     }
@@ -125,90 +393,18 @@ export const registerRoomHandlers = (
   socket.on("disconnect", () => handleLeaveRoom(io, socket, roomsData));
 
   // --- CREATE ROOM ---
-  socket.on(
-    "create_room",
-     (data: {
-      userName: string;
-      targetLength: number;
-      isSolo?: boolean;
-      maxMistakes?: number | null;
-      syncMusic?: boolean;
-    }) => {
-      // Name & targetLength validation
-      if (!data?.userName || data.userName.trim().length === 0 || data.userName.length > 20) {
-        socket.emit("error", "Érvénytelen felhasználónév!");
-        return;
-      }
-      if (!Number.isInteger(data.targetLength) || data.targetLength < 3 || data.targetLength > 30) {
-        socket.emit("error", "Érvénytelen célhossz!");
-        return;
-      }
-      if (data.maxMistakes !== undefined && data.maxMistakes !== null) {
-        if (!Number.isInteger(data.maxMistakes) || data.maxMistakes < 1 || data.maxMistakes > 10) {
-          socket.emit("error", "Érvénytelen hibahatár!");
-          return;
-        }
-      }
-      if (data.syncMusic !== undefined && typeof data.syncMusic !== "boolean") {
-        socket.emit("error", "Érvénytelen szinkronizációs beállítás!");
-        return;
-      }
+  socket.on("create_room", async (data: CreateRoomData) => {
+    if (!validateCreateRoomPayload(socket, data)) return;
 
-      let code: string;
-      do {
-        code = Math.random().toString(36).substring(2, 6).toUpperCase();
-      } while (roomsData[code]); // Check that the code is unique
-      
-      socket.join(code);
+    const code = generateUniqueRoomCode(roomsData);
+    socket.join(code);
 
-      const maxMistakes = data.maxMistakes !== undefined ? data.maxMistakes : null;
-
-      const newRoom: Room = {
-        players: [createPlayerObject(socket.id, data.userName)],
-        targetLength: data.targetLength,
-        deck: shuffle(hungarianSongs),
-        gameStarted: data.isSolo || false,
-        turnIndex: 0,
-        turnLocked: false,
-        maxMistakes,
-        syncMusic: data.syncMusic ?? true,
-        activeCard: undefined,
-        playbackState: PLAYBACK_STATE.STOPPED,
-        currentPlayingDeezerId: null,
-      };
-
-      roomsData[code] = newRoom;
-
-      if (data.isSolo) {
-        // Solo mode - initialization only, gameplay is handled by gameHandlers
-        const pDeck = generatePersonalDeck(
-          hungarianSongs,
-          newRoom.targetLength + 1,
-        );
-        newRoom.players[0].personalDeck = pDeck;
-        const startCard = newRoom.players[0].personalDeck.pop();
-        if (startCard) newRoom.players[0].timeline = [startCard];
-
-        socket.emit("game_started", {
-          players: newRoom.players,
-          currentTurn: socket.id,
-          roomCode: code,
-          maxMistakes: newRoom.maxMistakes,
-          targetLength: newRoom.targetLength,
-          isSolo: true,
-        });
-      } else {
-        socket.emit("room_created", code);
-        socket.emit("is_host", true);
-        io.to(code).emit("update_players", newRoom.players.map(p => p.name));
-        socket.emit("room_config_updated", {
-          targetLength: newRoom.targetLength,
-          maxMistakes: newRoom.maxMistakes,
-          syncMusic: newRoom.syncMusic,
-        });
-      }
-    },
-  );
+    if (data.isWeekly) {
+      await handleWeeklyRoomCreation(socket, code, data, roomsData);
+    } else {
+      handleStandardRoomCreation(io, socket, code, data, roomsData);
+    }
+  });
 
   // --- JOIN ROOM ---
   socket.on("join_room", (data: { code: string; userName: string }) => {
@@ -224,11 +420,14 @@ export const registerRoomHandlers = (
       return;
     }
 
-    if (!data?.userName || data.userName.trim().length === 0 || data.userName.length > 20) {
+    if (
+      !data?.userName ||
+      data.userName.trim().length === 0 ||
+      data.userName.length > 20
+    ) {
       socket.emit("error", "Érvénytelen felhasználónév!");
       return;
     }
-    
 
     const nameTaken = room.players.some(
       (p) => p.name.toLowerCase() === data.userName.toLowerCase(),
@@ -247,7 +446,10 @@ export const registerRoomHandlers = (
       syncMusic: room.syncMusic,
     });
 
-    io.to(data.code).emit("update_players", room.players.map(p => p.name));
+    io.to(data.code).emit(
+      "update_players",
+      room.players.map((p) => p.name),
+    );
     socket.to(data.code).emit("player_joined", data.userName);
   });
 
@@ -265,7 +467,11 @@ export const registerRoomHandlers = (
       if (room.players[0].id !== socket.id) return;
 
       if (data.targetLength !== undefined) {
-        if (!Number.isInteger(data.targetLength) || data.targetLength < 3 || data.targetLength > 30) {
+        if (
+          !Number.isInteger(data.targetLength) ||
+          data.targetLength < 3 ||
+          data.targetLength > 30
+        ) {
           socket.emit("error", "Érvénytelen célhossz!");
           return;
         }
@@ -279,7 +485,12 @@ export const registerRoomHandlers = (
         room.syncMusic = data.syncMusic;
       }
       if (data.maxMistakes !== undefined) {
-        if (data.maxMistakes !== null && (!Number.isInteger(data.maxMistakes) || data.maxMistakes < 1 || data.maxMistakes > 10)) {
+        if (
+          data.maxMistakes !== null &&
+          (!Number.isInteger(data.maxMistakes) ||
+            data.maxMistakes < 1 ||
+            data.maxMistakes > 10)
+        ) {
           socket.emit("error", "Érvénytelen hibahatár!");
           return;
         }
@@ -294,7 +505,7 @@ export const registerRoomHandlers = (
     },
   );
 
-  // --- START GAME (initialization only, no gameplay!) ---
+  // --- START GAME ---
   socket.on("start_game", (code: string) => {
     const room = roomsData[code];
     if (!room) return;
@@ -316,16 +527,13 @@ export const registerRoomHandlers = (
 
     // Every player gets a deck
     room.players.forEach((player) => {
-      const pDeck = generatePersonalDeck(
-        hungarianSongs,
-        room.targetLength + 1,
-      );
+      const pDeck = generatePersonalDeck(hungarianSongs, room.targetLength + 1);
       player.personalDeck = pDeck;
       const startCard = player.personalDeck.pop();
       if (startCard) {
         player.timeline = [startCard];
       }
-      // Reset streaks
+      // Reset stats
       player.winStreak = 0;
       player.loseStreak = 0;
       player.mistakes = 0;

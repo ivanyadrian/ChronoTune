@@ -4,12 +4,19 @@ import type { Song, Player } from "../../types";
 import { ChevronDown } from "lucide-react";
 import { Badge } from "../../components/ui/Badge";
 import { socket } from "../../socket";
+import { getMistakeColor } from "../../utils/scoreUtils";
+import { formatDuration } from "../../utils/timeUtils";
 
 interface GameResultViewProps {
   winner: {
     name: string;
     timeline: Song[];
     score?: number;
+    isWeekly?: boolean;
+    weeklyTimeInSeconds?: number;
+    weeklyMistakes?: number;
+    weekIdentifier?: string;
+    correctPlacements?: number;
   };
   lost: boolean;
   mistakes: number;
@@ -37,13 +44,16 @@ export const GameResultView = ({
   }, [players]);
 
   const activePlayer = useMemo(() => {
-    if (isSolo) {
+    if (isSolo || winner.isWeekly) {
       return {
         id: "solo",
         name: winner.name,
         timeline: winner.timeline,
         score: winner.score,
-        mistakes: mistakes,
+        mistakes: winner.isWeekly ? (winner.weeklyMistakes ?? mistakes) : mistakes,
+        correctPlacements: winner.isWeekly 
+          ? (winner.correctPlacements ?? winner.timeline.length - 1) 
+          : undefined,
       };
     }
     const found =
@@ -52,44 +62,35 @@ export const GameResultView = ({
   }, [isSolo, selectedPlayerId, players, sortedPlayers, winner, mistakes]);
 
   const activePlayerRank = useMemo(() => {
-    if (!activePlayer || isSolo) return -1;
-    // Dense Ranking: Collect unique scores in descending order
+    if (!activePlayer || isSolo || winner.isWeekly) return -1;
     const uniqueScores = Array.from(
       new Set(sortedPlayers.map((p) => p.score)),
     ).sort((a, b) => b - a);
-    // The rank is the index of the current score in the list of unique scores + 1
     return uniqueScores.indexOf(activePlayer.score ?? 0) + 1;
-  }, [activePlayer, sortedPlayers, isSolo]);
+  }, [activePlayer, sortedPlayers, isSolo, winner.isWeekly]);
 
   if (!activePlayer) return null;
 
-  const currentMistakes = isSolo ? mistakes : activePlayer.mistakes;
+  const currentMistakes = winner.isWeekly ? (winner.weeklyMistakes ?? mistakes) : activePlayer.mistakes;
   const mistakePercent =
     maxMistakes && maxMistakes > 0 ? currentMistakes / maxMistakes : 0;
 
-  const mistakeColor =
-    mistakePercent >= 0.8
-      ? "text-red-400"
-      : mistakePercent >= 0.5
-        ? "text-yellow-300"
-        : "text-green-400";
+  const mistakeColor = getMistakeColor(mistakePercent);
 
   return (
-    <div className="min-h-screen bg-[#090011] text-white">
+    <div className="min-h-screen bg-[#090011] text-white animate-in fade-in duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_450px] min-h-screen">
         {/* MAIN CONTENT (Left side) */}
-        {/* FIX: Use flex flex-col without justify-center on the parent so the Badge stays at the top */}
         <div className="flex flex-col items-center p-8 bg-[radial-gradient(circle_at_center,#2a0845_0%,#090011_70%)]">
-          {/* Badge is fixed at the very top */}
           <div className="w-full flex justify-center pt-4">
-            <Badge text="Result" />
+            <Badge text={winner.isWeekly ? "Weekly Challenge" : "Result"} />
           </div>
 
-          {/* FIX: Because of flex-1 this div takes all available space, and justify-center pulls its content vertically to the middle */}
           <div className="flex-1 w-full max-w-xl flex flex-col items-center justify-center text-center py-12">
-            {/* Title */}
-            <h1 className="text-4xl lg:text-6xl font-bold mb-4 flex items-center justify-center gap-3">
-              {isSolo ? (
+            <h1 className="text-4xl lg:text-6xl font-bold mb-4 flex items-center justify-center gap-3 font-archivo">
+              {winner.isWeekly ? (
+                "Kihívás teljesítve!"
+              ) : isSolo ? (
                 lost ? (
                   "Vereség!"
                 ) : (
@@ -108,9 +109,12 @@ export const GameResultView = ({
               )}
             </h1>
 
-            {/* Player selector */}
             <div className="w-full max-w-sm mb-12">
-              {isSolo ? (
+              {winner.isWeekly ? (
+                <p className="text-zinc-400 text-fluid-p">
+                  Sikeresen teljesítetted a heti kihívást! Az elért eredményedet automatikusan elmentettük a dicsőségtáblára.
+                </p>
+              ) : isSolo ? (
                 <p className="text-zinc-400 text-fluid-p">
                   {lost
                     ? "Elvesztetted az összes életed az utolsó forduló előtt."
@@ -127,12 +131,9 @@ export const GameResultView = ({
                       onChange={(e) => setSelectedPlayerId(e.target.value)}
                       className="w-full bg-bg-dark/80 border border-secondary/30 rounded-2xl px-3 py-2 lg:px-6 lg:py-4 text-white font-bold text-2xl md:text-4xl leading-tight text-start min-[200px]:text-center outline-none appearance-none cursor-pointer hover:bg-[#251630] transition-colors"
                     >
-                      {/* Hidden option for the currently selected player to show the name in the header */}
                       <option value={activePlayer.id} hidden>
                         {activePlayer.name}
                       </option>
-
-                      {/* Only show other players in the list */}
                       {sortedPlayers
                         .filter((player) => player.id !== activePlayer.id)
                         .map((player) => (
@@ -159,30 +160,32 @@ export const GameResultView = ({
 
             {/* Stats block */}
             <div className="grid grid-cols-1 min-[300px]:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 w-full mb-10">
-              {/* SCORE - stacks below 240px (1 col), 2 cols wide above, 1 on desktop */}
               <div className="col-span-1 min-[300px]:col-span-2 sm:col-span-1 rounded-3xl border border-white/5 bg-white/5 p-4 md:p-6 backdrop-blur flex flex-col justify-center items-center">
-                <p className="text-zinc-400 text-[10px] md:text-sm mb-2">
-                  PONTSZÁM
+                <p className="text-zinc-400 text-[10px] md:text-sm mb-2 uppercase font-archivo">
+                  {winner.isWeekly ? "Játékidő" : "Pontszám"}
                 </p>
                 <p className="text-3xl md:text-4xl font-archivo text-secondary-light">
-                  {activePlayer.score}
+                  {winner.isWeekly && typeof winner.weeklyTimeInSeconds === "number"
+                    ? formatDuration(winner.weeklyTimeInSeconds)
+                    : activePlayer.score}
                 </p>
               </div>
 
-              {/* TIMELINE LENGTH - 1 col wide on mobile */}
-              <div className="col-span-1 rounded-3xl border border-white/5 bg-white/5 p-3 md:p-6 backdrop-blur flex flex-col justify-center items-center">
-                <p className="text-zinc-400 text-[10px] md:text-sm mb-2">
-                  TIMELINE HOSSZA
-                </p>
-                <p className="text-3xl md:text-4xl font-archivo text-blue-400">
-                  {activePlayer.timeline.length}
-                </p>
-              </div>
+               <div className="col-span-1 rounded-3xl border border-white/5 bg-white/5 p-3 md:p-6 backdrop-blur flex flex-col justify-center items-center">
+                  <p className="text-zinc-400 text-[10px] md:text-sm mb-2 uppercase font-archivo">
+                    {winner.isWeekly ? "Sikeres" : "Timeline hossza"}
+                  </p>
+                  <p className="text-3xl md:text-4xl font-archivo text-blue-400">
+                    {winner.isWeekly 
+                      ? activePlayer.correctPlacements ?? 0
+                      : activePlayer.timeline.length
+                    }
+                  </p>
+                </div>
 
-              {/* MISTAKES - 1 col wide on mobile */}
               <div className="col-span-1 rounded-3xl border border-white/5 bg-white/5 p-3 md:p-6 backdrop-blur flex flex-col justify-center items-center">
-                <p className="text-zinc-400 text-[10px] md:text-sm mb-2">
-                  HIBÁK
+                <p className="text-zinc-400 text-[10px] md:text-sm mb-2 uppercase font-archivo">
+                  Hibák
                 </p>
                 <div className="flex items-baseline gap-1">
                   <span
@@ -221,22 +224,33 @@ export const GameResultView = ({
               </div>
             </div>
 
-            {/* Buttons*/}
+            {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 w-full">
-              {onRestart && (
-                <button
-                  onClick={onRestart}
-                  className="flex-1 rounded-full bg-linear-to-r from-(--primary) to-[color-mix(in_srgb,var(--primary)_70%,black)] py-4 font-semibold text-lg shadow-[0_0_30px] shadow-primary/45 hover:scale-[1.02] transition"
-                >
-                  Újra játszom
-                </button>
+              {winner.isWeekly ? (
+                  <button
+                    onClick={onLeave} // Both options share the back navigation callback
+                    className="flex-1 rounded-full font-archivo bg-linear-to-r from-(--primary) to-[color-mix(in_srgb,var(--primary)_70%,black)] py-4 font-semibold text-lg shadow-[0_0_30px] shadow-primary/45 hover:scale-[1.02] transition cursor-pointer text-white"
+                  >
+                    Vissza a ranglistához
+                  </button>
+              ) : (
+                <>
+                  {onRestart && (
+                    <button
+                      onClick={onRestart}
+                      className="flex-1 rounded-full bg-linear-to-r from-(--primary) to-[color-mix(in_srgb,var(--primary)_70%,black)] py-4 font-semibold text-lg shadow-[0_0_30px] shadow-primary/45 hover:scale-[1.02] transition cursor-pointer text-white"
+                    >
+                      Újra játszom
+                    </button>
+                  )}
+                  <button
+                    onClick={onLeave}
+                    className="flex-1 rounded-full bg-white/10 border border-white/10 py-4 font-semibold text-lg hover:bg-white/15 transition cursor-pointer text-white"
+                  >
+                    Kilépés
+                  </button>
+                </>
               )}
-              <button
-                onClick={onLeave}
-                className="flex-1 rounded-full bg-white/10 border border-white/10 py-4 font-semibold text-lg hover:bg-white/15 transition"
-              >
-                Kilépés
-              </button>
             </div>
           </div>
         </div>

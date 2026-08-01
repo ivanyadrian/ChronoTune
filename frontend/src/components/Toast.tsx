@@ -14,7 +14,7 @@ export const Toast = ({
   icon,
   isVisible,
 }: ToastProps) => {
-  // Lokális állapot a tartalom megőrzéséhez az animáció alatt
+  // Local state to retain content during exit animation
   const [displayMessage, setDisplayMessage] = useState(message);
   const [displayType, setDisplayType] = useState(type);
   const [displayIcon, setDisplayIcon] = useState(icon);
@@ -31,10 +31,9 @@ export const Toast = ({
     <div className="fixed top-4 sm:top-6 left-1/2 z-100  w-[calc(100%-2rem)] sm:w-auto pointer-events-none">
       <div
         className={`transition-all duration-500 ease-in-out
-          ${
-            isVisible
-              ? "translate-y-0 -translate-x-1/2 opacity-100"
-              : "-translate-y-20 -translate-x-1/2 opacity-0 pointer-events-none"
+          ${isVisible
+            ? "translate-y-0 -translate-x-1/2 opacity-100"
+            : "-translate-y-20 -translate-x-1/2 opacity-0 pointer-events-none"
           }`}
       >
         <div className="bg-bg-dark/95 backdrop-blur-md border border-primary/50 px-5 py-2.5 sm:px-6 rounded-2xl 
@@ -42,11 +41,10 @@ export const Toast = ({
         mx-auto max-w-xs sm:max-w-none">
           {/* Icon Container - Flex Center Added */}
           <div
-            className={`${
-              displayType === "leave" || displayType === "error"
+            className={`${displayType === "leave" || displayType === "error"
                 ? "bg-red-500"
                 : "bg-primary"
-            } rounded-full p-1.5 shrink-0 flex items-center justify-center`}
+              } rounded-full p-1.5 shrink-0 flex items-center justify-center`}
           >
             {displayIcon ? (
               displayIcon

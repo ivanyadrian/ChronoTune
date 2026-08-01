@@ -2,8 +2,11 @@
 import { Server, Socket } from "socket.io";
 import type { Room, Song } from "../types.js";
 import { shuffle } from "../utils/shuffle.js";
-import  hungarianSongs  from "../data/songs.json" with { type: "json" };
+import hungarianSongs from "../data/songs.json" with { type: "json" };
 import { SCORES, PLAYBACK_STATE, ERROR_CODES } from "../constants/index.js";
+import { Leaderboard, ActiveWeeklyRun } from "../db.js";
+import { updateWeeklyRunState, computeWeeklyTimeInSeconds, removeWeeklyRun } from "../services/weeklyService.js";
+
 
 // Helper function for sending errors
 const emitError = (socket: Socket, code: string, message: string) => {
@@ -58,29 +61,37 @@ export const registerGameHandlers = (
       const { room, currentPlayer } = context;
 
       if (room.activeCard) {
-        emitError(socket, ERROR_CODES.ALREADY_HAS_ACTIVE_CARD, "Mar huztal egy kartyat! Helyezd el vagy dobd el.");
+        emitError(socket, ERROR_CODES.ALREADY_HAS_ACTIVE_CARD, "Már húztál egy kártyát! Helyezd el vagy dobd el.");
         return;
       }
 
       const pDeck = currentPlayer.personalDeck;
       if (!pDeck || pDeck.length === 0) {
-        emitError(socket, ERROR_CODES.NO_MORE_CARDS, "Nincs tobb kartya a pakliban!");
+        emitError(socket, ERROR_CODES.NO_MORE_CARDS, "Nincs több kártya a pakliban!");
         return;
       }
 
       const nextCard = pDeck.pop();
       if (!nextCard) {
-        emitError(socket, ERROR_CODES.SERVER_ERROR, "Hiba tortent a kartyahuzas soran");
+        emitError(socket, ERROR_CODES.SERVER_ERROR, "Hiba törtent a kártyahúzás során");
         return;
       }
 
       room.activeCard = nextCard;
       room.playbackState = PLAYBACK_STATE.STOPPED;
 
+      if (room.isWeekly && room.weeklyRunId) {
+        updateWeeklyRunState(room.weeklyRunId, {
+          personalDeck: pDeck,
+          activeCard: nextCard,
+        }).catch((err) => console.error("Hiba a heti futás mentésekor (draw_card):", err));
+      }
+
       io.to(roomCode).emit("music_playback_toggled", {
         deezerId: nextCard.deezerId,
         state: PLAYBACK_STATE.STOPPED,
       });
+
 
       io.to(roomCode).emit("new_card_drawn", {
         id: nextCard.id,
@@ -101,7 +112,7 @@ export const registerGameHandlers = (
   // ------------------------ PLACE CARD ------------------------
   socket.on("place_card", (data: { roomCode: string; cardId: number; index: number }) => {
     let shouldClearCard = false;
-    
+
     try {
       const context = getAuthorizedTurnContext(socket, data.roomCode, roomsData);
       if (!context) return;
@@ -149,6 +160,7 @@ export const registerGameHandlers = (
       // Scoring
       if (isCorrect) {
         currentPlayer.timeline.splice(data.index, 0, fullCard);
+        currentPlayer.correctPlacements = (currentPlayer.correctPlacements || 0) + 1;
         delta = SCORES.CORRECT_PLACE;
         currentPlayer.winStreak++;
         currentPlayer.loseStreak = 0;
@@ -185,6 +197,18 @@ export const registerGameHandlers = (
       currentPlayer.attempts++;
       room.turnLocked = false;
 
+      if (room.isWeekly && room.weeklyRunId) {
+        updateWeeklyRunState(room.weeklyRunId, {
+          timeline: currentPlayer.timeline,
+          personalDeck: currentPlayer.personalDeck,
+          activeCard: null,
+          mistakes: currentPlayer.mistakes,
+          correctPlacements: currentPlayer.correctPlacements,
+          attempts: currentPlayer.attempts,
+        }).catch((err) => console.error("Hiba a heti futás mentésekor (place_card):", err));
+      }
+
+
       // Game over check
       const isLastPlayerInRound = room.turnIndex === room.players.length - 1;
       const isLastRoundImminent = isLastPlayerInRound && currentPlayer.attempts === room.targetLength - 1;
@@ -216,7 +240,74 @@ export const registerGameHandlers = (
         // SNAPSHOT: Save the data BEFORE setTimeout
         let gameOverPayload: any;
 
-        if (isMistakeLimitReached) {
+        if (room.isWeekly) {
+          const timeInSeconds = computeWeeklyTimeInSeconds(
+            room.weeklyElapsedMs || 0,
+            room.sessionStartTime
+          );
+
+          gameOverPayload = {
+            winnerName: currentPlayer.name,
+            finalTimeline: [...currentPlayer.timeline],
+            score: currentPlayer.score,
+            allPlayers: [...room.players],
+            isWeekly: true,
+            weeklyTimeInSeconds: timeInSeconds,
+            weeklyMistakes: currentPlayer.mistakes,
+            weekIdentifier: room.weekIdentifier,
+          };
+
+          if (room.weeklyRunId) {
+            removeWeeklyRun(room.weeklyRunId).catch((err) =>
+              console.error("Hiba az aktív heti futás törlésekor:", err)
+            );
+          }
+
+          // --- Save and real-time notification to clients browsing the leaderboard ---
+          (async () => {
+            try {
+              // sessionToken guard: if a 2nd tab took over the session, our
+              // token is stale in the DB — do not save to leaderboard.
+              if (room.weeklyRunId && room.weeklySessionToken) {
+                const currentRun = await ActiveWeeklyRun.findOne(
+                  { runId: room.weeklyRunId },
+                  { sessionToken: 1 }
+                ).lean() as { sessionToken?: string } | null;
+                // The run is already deleted (removeWeeklyRun finished) OR the token no longer matches
+                if (currentRun && currentRun.sessionToken !== room.weeklySessionToken) {
+                  console.warn(
+                    `[Weekly] Stale session for run ${room.weeklyRunId} — leaderboard save aborted.`
+                  );
+                  return;
+                }
+              }
+
+              // 1. Save to database
+              await Leaderboard.create({
+                username: currentPlayer.name,
+                fingerprint: room.fingerprint || "",
+                mistakes: currentPlayer.mistakes,
+                correctPlacements: currentPlayer.correctPlacements || 0,
+                timeInSeconds: timeInSeconds,
+                weekIdentifier: room.weekIdentifier,
+                createdAt: new Date(),
+              });
+
+              // 2. Fetch updated weekly leaderboard entries
+              const updatedLeaderboard = await Leaderboard.find({
+                weekIdentifier: room.weekIdentifier
+              })
+                .sort({ correctPlacements: -1, timeInSeconds: 1 })
+                .lean();
+
+              // 3. Emit updated leaderboard globally to ALL connected sockets
+              io.emit("weeklyLeaderboardUpdated", updatedLeaderboard);
+
+            } catch (dbErr) {
+              console.error("Hiba a heti kihívás mentése vagy a ranglista frissítése közben:", dbErr);
+            }
+          })();
+        } else if (isMistakeLimitReached) {
           gameOverPayload = {
             winnerName: null,
             finalTimeline: [...currentPlayer.timeline], // COPY
@@ -253,7 +344,6 @@ export const registerGameHandlers = (
           io.to(data.roomCode).emit("game_over", gameOverPayload);
         }, SCORES.GAME_OVER_DELAY_MS);
       }
-
     } catch (error) {
       console.error("[place_card] Critical error:", error);
       emitError(socket, ERROR_CODES.SERVER_ERROR, "Szerver hiba történt a kártya elhelyezése során");
@@ -271,6 +361,11 @@ export const registerGameHandlers = (
       if (!context) return;
 
       const { room, currentPlayer } = context;
+
+      if (room.isWeekly) {
+        emitError(socket, ERROR_CODES.FORBIDDEN_ACTION, "A heti kihívás során nem lehet kártyát eldobni!");
+        return;
+      }
 
       if (!room.activeCard) {
         emitError(socket, ERROR_CODES.NO_ACTIVE_CARD, "Nincs mit eldobni!");
@@ -402,35 +497,35 @@ export const registerGameHandlers = (
 
   // ------------------------ SYNCHRONIZE PLAYBACK STATE ------------------------
   socket.on("toggle_music_playback", (data: { roomCode: string; deezerId: string; state: number }) => {
-  try {
-    const context = getAuthorizedTurnContext(socket, data.roomCode, roomsData);
-    if (!context) return;
-    const { room } = context;
+    try {
+      const context = getAuthorizedTurnContext(socket, data.roomCode, roomsData);
+      if (!context) return;
+      const { room } = context;
 
-    // Only synchronize if room settings allow it
-    if (!room.syncMusic) return;
+      // Only synchronize if room settings allow it
+      if (!room.syncMusic) return;
 
-    // VALIDATION: Only allow valid states
-    const validStates = Object.values(PLAYBACK_STATE) as number[];
-    if (!validStates.includes(data.state)) return;
+      // VALIDATION: Only allow valid states
+      const validStates = Object.values(PLAYBACK_STATE) as number[];
+      if (!validStates.includes(data.state)) return;
 
-    // VALIDATION: deezerId cannot be empty
-    if (!data.deezerId || data.deezerId.trim().length === 0) return;
+      // VALIDATION: deezerId cannot be empty
+      if (!data.deezerId || data.deezerId.trim().length === 0) return;
 
-    // UPDATE: ONLY AFTER VALIDATIONS!
-    room.currentPlayingDeezerId = data.deezerId;
-    room.playbackState = data.state;
+      // UPDATE: ONLY AFTER VALIDATIONS!
+      room.currentPlayingDeezerId = data.deezerId;
+      room.playbackState = data.state;
 
-    // Notify all clients in the room about the new playback state
-    io.to(data.roomCode).emit("music_playback_toggled", {
-      deezerId: data.deezerId,
-      state: data.state,
-    });
+      // Notify all clients in the room about the new playback state
+      io.to(data.roomCode).emit("music_playback_toggled", {
+        deezerId: data.deezerId,
+        state: data.state,
+      });
 
-  } catch (error) {
-    console.error("[toggle_music_playback] Critical error:", error);
-  }
-});
+    } catch (error) {
+      console.error("[toggle_music_playback] Critical error:", error);
+    }
+  });
 
   // ------------------------ SYNCHRONIZE SEEK ------------------------
   socket.on("seek_music_playback", (data: { roomCode: string; position: number }) => {

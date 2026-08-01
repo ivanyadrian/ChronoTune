@@ -1,58 +1,42 @@
+import "dotenv/config"; // Load environment variables from .env
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import {
   registerRoomHandlers,
-  handleLeaveRoom,
 } from "./handlers/roomHandler.js";
 import { registerGameHandlers } from "./handlers/gameHandler.js";
 import { Room } from "./types.js";
+import { connectDB } from "./db.js";
+import {
+  initWeeklyScheduler,
+  checkAndResetWeeklyChallenge,
+} from "./services/weeklyService.js";
+import deezerRoutes from "./routes/deezerRoutes.js";
+import weeklyRoutes from "./routes/weeklyRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
-/**
- * Enable CORS (Cross-Origin Resource Sharing).
- * This is required so the frontend (e.g. localhost:5173)
- * can send requests to the backend (localhost:3001).
- */
-app.use(cors());
+// In development mode, allow all local network origins (e.g. mobile over WiFi)
+const CORS_ORIGIN = process.env.CORS_ORIGIN || true;
 
-/**
- * DEEZER PROXY ENDPOINT
- * Browsers often block direct API calls from the frontend due to CORS.
- * This server-side proxy intercepts the request,
- * fetches the data from Deezer, and forwards it to the client.
- */
-app.get("/api/deezer-proxy/:trackId", async (req, res) => {
-  const { trackId } = req.params;
-
-  if (!/^\d+$/.test(trackId)) {
-    return res.status(400).json({ error: "Érvénytelen track ID formátum" });
-  }
-
-  try {
-    const response = await fetch(`https://api.deezer.com/track/${trackId}`);
-
-    if (!response.ok) {
-      console.error(
-        `Deezer API hiba: ${response.status} - ${response.statusText}`,
-      );
-      return res.status(response.status).json({
-        error: "Deezer API hiba",
-        status: response.status,
-      });
-    }
-
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error("Proxy hiba:", error);
-    res.status(500).json({ error: "Nem sikerült elérni a Deezert" });
-  }
+// Connect to MongoDB
+connectDB().then(async () => {
+  // Ensure the weekly challenge is generated/synced at startup
+  await checkAndResetWeeklyChallenge();
+  // Start the weekly scheduler (Monday 12:00 reset)
+  initWeeklyScheduler();
 });
+
+// Middleware
+app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
+app.use(express.json()); // Enable JSON body parsing for POST requests
+
+// API Routes
+app.use("/api/deezer-proxy", deezerRoutes);
+app.use("/api/weekly-challenge", weeklyRoutes);
 
 // Create HTTP server from the Express application
 const httpServer = createServer(app);
@@ -89,5 +73,5 @@ io.on("connection", (socket) => {
 
 // START SERVER
 httpServer.listen(PORT, () => {
-  console.log(`Szerver fut a http://localhost:${PORT} címen`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });

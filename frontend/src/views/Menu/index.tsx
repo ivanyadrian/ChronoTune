@@ -4,11 +4,13 @@ import { NameStep } from "./steps/NameStep";
 import { ModeChoiceStep } from "./steps/ModeChoiceStep";
 import { SoloConfigStep } from "./steps/SoloConfigStep";
 import { MultiplayerConfigStep } from "./steps/MultiplayerConfigStep";
+import { WeeklyChallengeView } from "../WeeklyChallenge/WeeklyChallengeView";
 
 interface MenuViewProps {
   userName: string;
   setUserName: Dispatch<SetStateAction<string>>;
   handleCreateRoom: (isSolo?: boolean) => void;
+  createWeeklyRoom: (userName: string) => void;
   handleJoinRoom: () => void;
   inputCode: string;
   setInputCode: Dispatch<SetStateAction<string>>;
@@ -18,14 +20,15 @@ interface MenuViewProps {
   isConnected: boolean;
   selectedMaxMistakes: number | null | undefined;
   setSelectedMaxMistakes: Dispatch<SetStateAction<number | null | undefined>>;
-  step: "name" | "choice" | "solo" | "multi";
-  setStep: Dispatch<SetStateAction<"name" | "choice" | "solo" | "multi">>;
+  step: "name" | "choice" | "solo" | "multi" | "weekly";
+  setStep: Dispatch<SetStateAction<"name" | "choice" | "solo" | "multi" | "weekly">>;
 }
 
 export const MenuView = ({
   userName,
   setUserName,
   handleCreateRoom,
+  createWeeklyRoom,
   handleJoinRoom,
   setInputCode,
   error,
@@ -41,8 +44,10 @@ export const MenuView = ({
   // Preload images
   useEffect(() => {
     const imagesToPreload = [
-      "/img/singleplayer_cover.jpg",
-      "/img/multiplayer_cover.jpg",
+      "/img/singleplayer_cover.webp",
+      "/img/multiplayer_cover.webp",
+      "/img/weekly_challenge_cover.webp",
+      "/img/cover_placeholder.webp",
     ];
     imagesToPreload.forEach((src) => {
       const img = new Image();
@@ -65,6 +70,7 @@ export const MenuView = ({
           isConnected={isConnected}
           onSelectSolo={() => setStep("solo")}
           onSelectMulti={() => setStep("multi")}
+          onSelectWeekly={() => setStep("weekly")}
           onBack={() => setStep("name")}
         />
       )}
@@ -83,11 +89,6 @@ export const MenuView = ({
 
       {step === "multi" && (
         <MultiplayerConfigStep
-          // userName={userName}
-          // targetLength={targetLength}
-          // setTargetLength={setTargetLength}
-          // selectedMaxMistakes={selectedMaxMistakes}
-          // setSelectedMaxMistakes={setSelectedMaxMistakes}
           onCreateRoom={() => handleCreateRoom(false)}
           inputCode={inputCode}
           setInputCode={setInputCode}
@@ -96,6 +97,15 @@ export const MenuView = ({
             handleJoinRoom();
           }}
           onBack={() => setStep("choice")}
+        />
+      )}
+
+      {step === "weekly" && (
+        <WeeklyChallengeView
+          userName={userName}
+          setUserName={setUserName}
+          onBack={() => setStep("choice")}
+          onStartChallenge={() => createWeeklyRoom(userName)}
         />
       )}
 

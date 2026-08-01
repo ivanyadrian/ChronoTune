@@ -59,7 +59,7 @@ export const MultiplayerConfigStep = ({
               onClick={onCreateRoom}
               className="relative w-full py-4 sm:py-5 px-6 sm:px-10 bg-linear-to-b from-(--primary) to-[color-mix(in_srgb,var(--primary)_80%,black)] rounded-full flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
             >
-              <span className="text-white font-archivo text-[clamp(0.875rem,1.5vw,1rem)] uppercase tracking-wider">
+              <span className="text-white font-archivo text-fluid-p uppercase tracking-wider">
                 Létrehozás
               </span>
             </button>

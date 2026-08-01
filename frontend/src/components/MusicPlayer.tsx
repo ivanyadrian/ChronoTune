@@ -9,6 +9,8 @@ import {
   RotateCcw,
   Trash,
 } from "lucide-react";
+import { getApiUrl } from "../utils/apiUtils";
+import { getStoredVolume, setStoredVolume } from "../utils/storageUtils";
 import { AudioVisualizer } from "./ui/AudioVisualizer";
 
 export const MusicPlayer = ({
@@ -23,6 +25,7 @@ export const MusicPlayer = ({
   canDiscard,
   onDiscard,
   isMyTurn,
+  isWeekly,
   syncMusic,
 }: any) => {
   const [progress, setProgress] = useState(0);
@@ -32,10 +35,7 @@ export const MusicPlayer = ({
   const [isMobile, setIsMobile] = useState(false);
 
   // Volume states
-  const [volume, setVolume] = useState<number>(() => {
-    const savedVolume = localStorage.getItem("chronotune-volume");
-    return savedVolume ? parseInt(savedVolume) : 50;
-  });
+  const [volume, setVolume] = useState<number>(() => getStoredVolume(50));
   const [previousVolume, setPreviousVolume] = useState<number>(volume);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -44,7 +44,7 @@ export const MusicPlayer = ({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640 || 'ontouchstart' in window);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -55,7 +55,7 @@ export const MusicPlayer = ({
     if (isMobile) {
       setVolume(100);
       setIsMuted(false);
-      localStorage.setItem("chronotune-volume", "100");
+      setStoredVolume(100);
     }
   }, [isMobile]);
 
@@ -72,7 +72,7 @@ export const MusicPlayer = ({
 
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/deezer-proxy/${currentSong.deezerId}`,
+          getApiUrl(`/api/deezer-proxy/${currentSong.deezerId}`),
         );
         const data = await response.json();
 
@@ -148,7 +148,7 @@ export const MusicPlayer = ({
 
     setVolume(newVolume);
     setIsMuted(false);
-    localStorage.setItem("chronotune-volume", newVolume.toString());
+    setStoredVolume(newVolume);
   };
 
   const toggleMute = () => {
@@ -174,7 +174,7 @@ export const MusicPlayer = ({
     >
       {/* Discard button */}
       <div className="relative">
-        {canDiscard && (
+        {canDiscard && !isWeekly && (
           <button
             onMouseDown={(e) => e.stopPropagation()}
             onClick={onDiscard}
@@ -214,9 +214,8 @@ export const MusicPlayer = ({
             <div className="w-32 h-32 sm:w-36 sm:h-36 bg-black rounded-full flex items-center justify-center shadow-2xl border-4 border-neutral-900 relative">
               {/* Vinyl */}
               <div
-                className={`w-[94%] h-[94%] rounded-full vinyl-texture flex items-center justify-center border border-neutral-800 transition-transform animate-vinyl-spin ${
-                  playbackState !== 1 ? "animation-paused" : ""
-                } relative`}
+                className={`w-[94%] h-[94%] rounded-full vinyl-texture flex items-center justify-center border border-neutral-800 transition-transform animate-vinyl-spin ${playbackState !== 1 ? "animation-paused" : ""
+                  } relative`}
               >
                 {/* Center Label */}
                 <div className="w-[35%] h-[35%] bg-primary rounded-full flex items-center justify-center shadow-inner relative z-10">
@@ -247,9 +246,8 @@ export const MusicPlayer = ({
 
               {/* Tonearm */}
               <div
-                className={`absolute right-2.5 w-[45%] h-2 bg-neutral-600 rounded-full origin-right transition-transform duration-500 z-10 shadow-md ${
-                  playbackState === 1 ? "rotate-[-25deg]" : "rotate-[-10deg]"
-                }`}
+                className={`absolute right-2.5 w-[45%] h-2 bg-neutral-600 rounded-full origin-right transition-transform duration-500 z-10 shadow-md ${playbackState === 1 ? "rotate-[-25deg]" : "rotate-[-10deg]"
+                  }`}
                 style={{ top: "15%" }}
               >
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-3 bg-neutral-800 rounded-sm border border-neutral-700" />
@@ -435,7 +433,7 @@ export const MusicPlayer = ({
         ref={audioRef}
         src={
           currentSong?.deezerId
-            ? `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/deezer-proxy/${currentSong.deezerId}`
+            ? getApiUrl(`/api/deezer-proxy/${currentSong.deezerId}`)
             : undefined
         }
         crossOrigin="anonymous"

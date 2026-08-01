@@ -26,6 +26,7 @@ function App() {
     gameMessage,
     countdown,
     createRoom,
+    createWeeklyRoom,
     joinRoom,
     startGame,
     discardCard,
@@ -38,6 +39,8 @@ function App() {
     isRetryCard,
     lastDelta,
     isSolo,
+    isWeekly,
+    weeklyElapsedMs,
     onUpdatePending,
     toast,
     triggerToast,
@@ -49,7 +52,7 @@ function App() {
   } = useGameSocket();
 
   const [userName, setUserName] = useState("");
-  const [step, setStep] = useState<"name" | "choice" | "solo" | "multi">(
+  const [step, setStep] = useState<"name" | "choice" | "solo" | "multi" | "weekly">(
     "name",
   );
   const [localTargetLength, setLocalTargetLength] = useState(10);
@@ -67,8 +70,13 @@ function App() {
   };
 
   const handleLeave = () => {
+    const wasWeekly = !!winner?.isWeekly;
     leaveRoom();
-    setStep("choice");
+    if (wasWeekly) {
+      setStep("weekly");
+    } else {
+      setStep("choice");
+    }
   };
 
   const handleCreateRoom = (isSoloMode: boolean = false) => {
@@ -81,34 +89,30 @@ function App() {
     );
   };
 
-const handleJoinRoom = (codeFromComponent?: string) => {
-  if (!userName) return triggerToast("Adj meg egy nevet!", "error");
-  
-  // If code is provided from component, use it, otherwise use local state
-  const finalCode = codeFromComponent || inputCode;
+  const handleJoinRoom = (codeFromComponent?: string) => {
+    if (!userName) return triggerToast("Adj meg egy nevet!", "error");
+    
+    // If code is provided from component, use it, otherwise use local state
+    const finalCode = codeFromComponent || inputCode;
 
-  if (finalCode.length !== 4) {
-    return triggerToast("A kódnak 4 karakter hosszúnak kell lennie!", "error");
-  }
-  
-  joinRoom(finalCode, userName);
-};
+    if (finalCode.length !== 4) {
+      return triggerToast("A kódnak 4 karakter hosszúnak kell lennie!", "error");
+    }
+    
+    joinRoom(finalCode, userName);
+  };
 
   // Loading state
- if (!isConnected) {
-  return (
-    <div className="flex items-center justify-center h-dvh">
-      <div className="text-center">
-        {/* CORRECTED LINE: "border-[var(--secondary-light)]" replaces the incorrect class */}
-        <div className="animate-spin w-10 h-10 border-4 border-secondary-light border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-white/60 font-medium">Kapcsolódás a szerverhez...</p>
-        <p className="text-white/40 text-sm mt-2">
-          Ellenőrizd, hogy a backend fut-e
-        </p>
+  if (!isConnected) {
+    return (
+      <div className="flex items-center justify-center h-dvh bg-linear-to-br from-[rgb(45,13,58)] via-[rgb(15,5,24)] to-[rgb(33,10,43)]">
+        <div className="text-center">
+          <div className="animate-spin w-10 h-10 border-4 border-secondary-light border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-white/60 font-medium animate-pulse">Kapcsolódás a szerverhez...</p>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="relative min-h-dvh text-white bg-linear-to-br from-[rgb(45,13,58)] via-[rgb(15,5,24)] to-[rgb(33,10,43)] font-sans selection:bg-secondary-light selection:text-black">
@@ -135,7 +139,7 @@ const handleJoinRoom = (codeFromComponent?: string) => {
             mistakes={mistakes}
             maxMistakes={maxMistakes}
             onLeave={handleLeave}
-            onRestart={isSolo ? handleRestart : undefined}
+            onRestart={winner.isWeekly ? undefined : (isSolo ? handleRestart : undefined)}
             isSolo={isSolo}
             players={isSolo ? [] : allPlayers}
           />
@@ -147,6 +151,7 @@ const handleJoinRoom = (codeFromComponent?: string) => {
               userName={userName}
               setUserName={setUserName}
               handleCreateRoom={handleCreateRoom}
+              createWeeklyRoom={createWeeklyRoom}
               handleJoinRoom={handleJoinRoom}
               inputCode={inputCode}
               setInputCode={setInputCode}
@@ -196,6 +201,8 @@ const handleJoinRoom = (codeFromComponent?: string) => {
                   maxMistakes,
                   targetLength: effectiveTargetLength,
                   isSolo,
+                  isWeekly,
+                  weeklyElapsedMs,
                   syncMusic,
                   roomCode,
                   musicPlaybackState,

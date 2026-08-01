@@ -47,6 +47,7 @@ export const ERROR_CODES = {
   SERVER_ERROR: "SERVER_ERROR",
   NO_MORE_CARDS: "NO_MORE_CARDS",
   ACTION_IN_PROGRESS: "ACTION_IN_PROGRESS",
+  FORBIDDEN_ACTION: "FORBIDDEN_ACTION",
 } as const;
 
 export type ScoreKeys = keyof typeof SCORES;

@@ -7,10 +7,10 @@
 @import "./components/buttons.css";
 @import "./components/vinyl.css";
 
-/* Animációk */
+/* Animations */
 @import "./animations/visualizer.css";
 @import "./animations/slide.css";
 @import "./animations/heartbeat.css";
 
-/* Segédprogramok */
+/* Utilities */
 @import "./utils/scrollbar.css";
