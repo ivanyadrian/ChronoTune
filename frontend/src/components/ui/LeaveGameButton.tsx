@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 interface LeaveGameButtonProps {
   onConfirm: () => void;
@@ -10,6 +11,7 @@ const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
   onConfirm,
   children,
 }) => {
+  const { t } = useLanguage();
   const [showConfirm, setShowConfirm] = useState(false);
 
   return (
@@ -31,7 +33,7 @@ const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
             text-white font-bold uppercase tracking-widest 
             transition-all duration-300 hover:scale-105 font-archivo"
         >
-          <span>Kilépés</span>
+          <span>{t.leaveButtonLabel}</span>
         </button>
       )}
 
@@ -46,11 +48,11 @@ const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
             </div>
 
             <h3 className="mb-2 text-center text-xl font-bold text-white">
-              Elhagyod a játékot?
+              {t.leaveTitle}
             </h3>
 
             <p className="text-center mb-5 text-slate-300 italic text-fluid-p">
-              A jelenlegi játékállásod elveszíted!
+              {t.leaveWarning}
             </p>
 
             <div className="flex flex-col gap-3">
@@ -58,13 +60,13 @@ const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
                 onClick={onConfirm}
                 className="w-full rounded-xl bg-red-700 py-3 font-bold text-white transition hover:bg-red-600 active:scale-95"
               >
-                <p className="text-fluid-p tracking-widest font-archivo"> Elhagyom </p>
+                <p className="text-fluid-p tracking-widest font-archivo">{t.leaveConfirm}</p>
               </button>
               <button
                 onClick={() => setShowConfirm(false)}
                 className="w-full rounded-xl bg-slate-800 py-3 font-bold text-slate-300 transition hover:bg-slate-700 active:scale-95"
               >
-                <p className="text-fluid-p">Mégsem</p>
+                <p className="text-fluid-p">{t.leaveCancel}</p>
               </button>
             </div>
           </div>

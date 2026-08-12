@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { socket } from "./socket";
 import { GameBoard } from "./views/GameBoard/index";
 import { MenuView } from "./views/Menu/index";
@@ -7,8 +7,10 @@ import { GameResultView } from "./views/GameResult/GameResult";
 import { GameMessage } from "./components/GameMessage";
 import { useGameSocket } from "./hooks/useGameSocket";
 import { Toast } from "./components/Toast";
+import { useLanguage } from "./context/LanguageContext";
 
 function App() {
+  const { t } = useLanguage();
   const {
     isConnected,
     roomCode,
@@ -17,6 +19,7 @@ function App() {
     allPlayers,
     gameStarted,
     syncMusic,
+    songLibrary,
     targetLength: socketTargetLength,
     currentTurnId,
     currentSong,
@@ -52,6 +55,17 @@ function App() {
   } = useGameSocket();
 
   const [userName, setUserName] = useState("");
+  const [selectedSongLibrary, setSelectedSongLibrary] = useState<'hu' | 'en'>('hu');
+  const [showConnectingInfo, setShowConnectingInfo] = useState(false);
+
+  useEffect(() => {
+    if (isConnected) {
+      setShowConnectingInfo(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowConnectingInfo(true), 5000);
+    return () => clearTimeout(timer);
+  }, [isConnected]);
   const [step, setStep] = useState<"name" | "choice" | "solo" | "multi" | "weekly">(
     "name",
   );
@@ -80,25 +94,27 @@ function App() {
   };
 
   const handleCreateRoom = (isSoloMode: boolean = false) => {
-    if (!userName) return triggerToast("Adj meg egy nevet!", "error");
+    if (!userName) return triggerToast(t.enterName, "error");
     createRoom(
       userName,
       localTargetLength,
       isSoloMode,
       isSoloMode ? (selectedMaxMistakes ?? null) : null,
+      true,
+      selectedSongLibrary,
     );
   };
 
   const handleJoinRoom = (codeFromComponent?: string) => {
-    if (!userName) return triggerToast("Adj meg egy nevet!", "error");
-    
+    if (!userName) return triggerToast(t.enterName, "error");
+
     // If code is provided from component, use it, otherwise use local state
     const finalCode = codeFromComponent || inputCode;
 
     if (finalCode.length !== 4) {
-      return triggerToast("A kódnak 4 karakter hosszúnak kell lennie!", "error");
+      return triggerToast(t.codeLength, "error");
     }
-    
+
     joinRoom(finalCode, userName);
   };
 
@@ -108,7 +124,8 @@ function App() {
       <div className="flex items-center justify-center h-dvh bg-linear-to-br from-[rgb(45,13,58)] via-[rgb(15,5,24)] to-[rgb(33,10,43)]">
         <div className="text-center">
           <div className="animate-spin w-10 h-10 border-4 border-secondary-light border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-white/60 font-medium animate-pulse">Kapcsolódás a szerverhez...</p>
+          <p className="text-white/60 font-medium animate-pulse">{t.connecting}</p>
+          <p className={`text-white/40 text-sm mt-2 px-10 transition-opacity duration-700 ${showConnectingInfo ? 'opacity-100' : 'opacity-0'}`}>{t.connectingInfo}</p>
         </div>
       </div>
     );
@@ -162,6 +179,8 @@ function App() {
               isConnected={isConnected}
               selectedMaxMistakes={selectedMaxMistakes}
               setSelectedMaxMistakes={setSelectedMaxMistakes}
+              selectedSongLibrary={selectedSongLibrary}
+              setSelectedSongLibrary={setSelectedSongLibrary}
               step={step}
               setStep={setStep}
             />
@@ -176,12 +195,16 @@ function App() {
                 currentUserName={userName}
                 targetLength={effectiveTargetLength}
                 syncMusic={syncMusic}
+                songLibrary={songLibrary}
                 onSyncMusicChange={(val) =>
                   updateRoomConfig({ syncMusic: val })
                 }
                 onTargetLengthChange={(val) => {
                   setLocalTargetLength(val);
                   if (isHost) updateRoomConfig({ targetLength: val });
+                }}
+                onSongLibraryChange={(val) => {
+                  if (isHost) updateRoomConfig({ songLibrary: val });
                 }}
                 onShowToast={triggerToast}
                 startGame={startGame}

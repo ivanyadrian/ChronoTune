@@ -2,7 +2,7 @@
 import { Server, Socket } from "socket.io";
 import type { Room, Song } from "../types.js";
 import { shuffle } from "../utils/shuffle.js";
-import hungarianSongs from "../data/songs.json" with { type: "json" };
+import hungarianSongs from "../data/hu_songs.json" with { type: "json" };
 import { SCORES, PLAYBACK_STATE, ERROR_CODES } from "../constants/index.js";
 import { Leaderboard, ActiveWeeklyRun } from "../db.js";
 import { updateWeeklyRunState, computeWeeklyTimeInSeconds, removeWeeklyRun } from "../services/weeklyService.js";

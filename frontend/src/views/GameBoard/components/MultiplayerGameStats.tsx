@@ -1,6 +1,7 @@
 import React from "react";
 import type { Player } from "../../../types";
 import LeaveGameButton from "../../../components/ui/LeaveGameButton";
+import { useLanguage } from "../../../context/LanguageContext";
 
 interface MultiplayerGameStatsProps {
   activePlayer: Player;
@@ -15,6 +16,7 @@ const MultiplayerGameStats: React.FC<MultiplayerGameStatsProps> = ({
   targetLength,
   onLeaveGame,
 }) => {
+  const { t } = useLanguage();
 
   return (
     <div className="w-full flex flex-col border-b-2 border-white/10 py-3 px-4 bg-black/30">
@@ -24,7 +26,7 @@ const MultiplayerGameStats: React.FC<MultiplayerGameStatsProps> = ({
         <div className={`flex w-1/2 xs:w-full justify-start order-1`}>
           <div className="flex flex-col items-start justify-center">
             <span className="text-[8px] sm:text-xxs uppercase font-archivo tracking-[0.2em] text-white/40">
-              FORDULÓ
+              {t.round}
             </span>
             <div className="flex items-center gap-2">
               <span className="text-2xl sm:text-4xl font-archivo text-white drop-shadow-lg">

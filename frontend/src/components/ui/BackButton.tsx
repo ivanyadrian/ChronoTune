@@ -1,4 +1,5 @@
 import { MoveLeft } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface BackButtonProps {
   onClick: () => void;
@@ -6,7 +7,10 @@ interface BackButtonProps {
   className?: string;
 }
 
-const BackButton = ({ onClick, label = "Vissza", className = "" }: BackButtonProps) => {
+const BackButton = ({ onClick, label, className = "" }: BackButtonProps) => {
+  const { t } = useLanguage();
+  const displayLabel = label ?? t.back;
+
   return (
     <button
       onClick={onClick}
@@ -17,7 +21,7 @@ const BackButton = ({ onClick, label = "Vissza", className = "" }: BackButtonPro
         strokeWidth={3}
         className="transition-transform group-hover:-translate-x-1" 
       />
-      <span>{label}</span>
+      <span>{displayLabel}</span>
     </button>
   );
 };

@@ -1,19 +1,17 @@
 import { useRef } from "react";
 import { Plus, Users, MoveRight } from "lucide-react";
 import BackButton from "../../../components/ui/BackButton";
+import { useLanguage } from "../../../context/LanguageContext";
 
 
 interface MultiplayerConfigStepProps {
-  // userName: string;
-  // targetLength: number;
-  // setTargetLength: (value: number) => void;
-  // selectedMaxMistakes: number | null | undefined;
-  // setSelectedMaxMistakes: (value: number | null | undefined) => void;
   onCreateRoom: () => void;
   onJoinRoom: (code: string) => void;
   onBack: () => void;
   inputCode: string;
   setInputCode: (value: string) => void;
+  songLibrary: 'hu' | 'en';
+  setSongLibrary: (value: 'hu' | 'en') => void;
 }
 
 export const MultiplayerConfigStep = ({
@@ -23,6 +21,7 @@ export const MultiplayerConfigStep = ({
   inputCode,
   setInputCode,
 }: MultiplayerConfigStepProps) => {
+  const { t } = useLanguage();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleJoin = () => {
@@ -45,22 +44,21 @@ export const MultiplayerConfigStep = ({
               />
             </div>
             <h3 className="text-2xl sm:text-4xl font-archivo text-white italic uppercase tracking-tighter">
-              Új játék
+              {t.multiNewGame}
             </h3>
             <p className="text-xs sm:text-base text-slate-400 mt-4 leading-relaxed max-w-xs mx-auto">
-              Készíts egy új szobát, ahová a barátaid csatlakozhatnak a
-              kóddal.
+              {t.multiNewGameDesc}
             </p>
           </div>
 
-          <div className="relative w-full max-w-sm mt-8 sm:mt-16 lg:mt-auto">
+          <div className="relative w-full max-w-sm mt-8 sm:mt-8 lg:mt-auto">
             <div className="absolute -inset-1 bg-linear-to-r from-(--primary) to-[color-mix(in_srgb,var(--primary)_80%,black)] rounded-full blur-xl opacity-20 group-hover:opacity-60 transition duration-500" />
             <button
               onClick={onCreateRoom}
               className="relative w-full py-4 sm:py-5 px-6 sm:px-10 bg-linear-to-b from-(--primary) to-[color-mix(in_srgb,var(--primary)_80%,black)] rounded-full flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
             >
               <span className="text-white font-archivo text-fluid-p uppercase tracking-wider">
-                Létrehozás
+                {t.multiCreate}
               </span>
             </button>
           </div>
@@ -77,16 +75,16 @@ export const MultiplayerConfigStep = ({
               />
             </div>
             <h3 className="text-2xl sm:text-4xl font-archivo text-white italic uppercase tracking-tighter">
-              Csatlakozás
+              {t.multiJoin}
             </h3>
             <p className="text-xs sm:text-base text-slate-400 mt-4 leading-relaxed max-w-xs mx-auto">
-              Írd be a 4 jegyű azonosítót a belépéshez.
+              {t.multiJoinDesc}
             </p>
           </div>
 
           <div className="w-full max-w-sm mt-8 sm:mt-12 lg:mt-auto">
             <label className="text-[9px] sm:text-[10px] font-archivo uppercase tracking-[0.3em] text-slate-500 lg:mt-10 mb-4 block">
-              Szoba azonosító
+              {t.multiRoomId}
             </label>
 
             <div className="flex justify-between gap-2 sm:gap-3 mb-6">
@@ -165,7 +163,7 @@ export const MultiplayerConfigStep = ({
               className="w-full py-4 sm:py-5 px-6 border-2 border-primary rounded-full flex items-center justify-center gap-3 transition-all hover:bg-primary/10 active:scale-95 disabled:opacity-20 disabled:grayscale"
             >
               <span className="text-primary font-archivo text-sm sm:text-lg uppercase tracking-wider">
-                Belépés
+                {t.multiEnter}
               </span>
               <MoveRight
                 size={18}

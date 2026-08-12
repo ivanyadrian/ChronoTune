@@ -20,6 +20,8 @@ interface MenuViewProps {
   isConnected: boolean;
   selectedMaxMistakes: number | null | undefined;
   setSelectedMaxMistakes: Dispatch<SetStateAction<number | null | undefined>>;
+  selectedSongLibrary: 'hu' | 'en';
+  setSelectedSongLibrary: Dispatch<SetStateAction<'hu' | 'en'>>;
   step: "name" | "choice" | "solo" | "multi" | "weekly";
   setStep: Dispatch<SetStateAction<"name" | "choice" | "solo" | "multi" | "weekly">>;
 }
@@ -37,6 +39,8 @@ export const MenuView = ({
   isConnected,
   selectedMaxMistakes,
   setSelectedMaxMistakes,
+  selectedSongLibrary,
+  setSelectedSongLibrary,
   step,
   setStep,
   inputCode,
@@ -82,6 +86,8 @@ export const MenuView = ({
           setTargetLength={setTargetLength}
           selectedMaxMistakes={selectedMaxMistakes}
           setSelectedMaxMistakes={setSelectedMaxMistakes}
+          songLibrary={selectedSongLibrary}
+          setSongLibrary={setSelectedSongLibrary}
           onStart={() => handleCreateRoom(true)}
           onBack={() => setStep("choice")}
         />
@@ -96,6 +102,8 @@ export const MenuView = ({
             setInputCode(code);
             handleJoinRoom();
           }}
+          songLibrary={selectedSongLibrary}
+          setSongLibrary={setSelectedSongLibrary}
           onBack={() => setStep("choice")}
         />
       )}

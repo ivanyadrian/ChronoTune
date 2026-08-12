@@ -1,4 +1,5 @@
 import type { Song } from "../types";
+import { useLanguage } from "../context/LanguageContext";
 
 interface VerticalTimelineProps {
   timeline: Song[];
@@ -8,11 +9,13 @@ interface VerticalTimelineProps {
 
 export const VerticalTimeline = ({
   timeline,
-  title = "Timeline",
+  title,
   subtitle,
 }: VerticalTimelineProps) => {
+  const { t } = useLanguage();
   if (!timeline) return null;
 
+  const displayTitle = title ?? "Timeline";
   const startYear = timeline[0]?.year;
   const endYear = timeline[timeline.length - 1]?.year;
 
@@ -21,13 +24,13 @@ export const VerticalTimeline = ({
       {/* Header */}
       <div className="p-6 border-b border-white/5 bg-black/20 backdrop-blur-md shrink-0">
         <h2 className="text-xl sm:text-2xl font-archivo uppercase italic tracking-tighter text-white">
-          {title}
+          {displayTitle}
         </h2>
         <p className="text-zinc-500 text-xs sm:text-sm font-medium mt-1">
           {subtitle ||
             (timeline.length > 0
-              ? `Időrendi sorrend: ${startYear} — ${endYear}`
-              : "Üres timeline")}
+              ? `${t.verticalTimelineDefault} ${startYear} — ${endYear}`
+              : t.verticalTimelineEmpty)}
         </p>
       </div>
 

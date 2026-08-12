@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { socket } from "../socket";
 import type { Player, Song, PlacementResultData, GameStartedData } from "../types";
 import { setStoredWeeklyRunId, removeStoredWeeklyRunId } from "../utils/storageUtils";
+import { useLanguage } from "../context/LanguageContext";
 
 interface WinnerData {
   names?: string[];
@@ -33,6 +34,12 @@ export const useGameplaySocket = (
   setTargetLength: (val: number) => void,
   setRoomCode: (val: string | null) => void,
 ) => {
+  const { t } = useLanguage();
+  // tRef ensures socket handlers always use the current language
+  // without having to re-register all listeners on every language change
+  const tRef = useRef(t);
+  useEffect(() => { tRef.current = t; }, [t]);
+
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [currentTurnId, setCurrentTurnId] = useState<string | null>(null);
@@ -115,9 +122,9 @@ export const useGameplaySocket = (
       if (data.isRetry) {
         const isMe = data.playerId === socket.id;
         if (isMe) {
-          triggerToast("Ezt a kártyát eldobhatod.", "info");
+          triggerToast(tRef.current.retryCardYou, "info");
         } else {
-          triggerToast(`${data.userName} eldobhatja ezt a számot!`, "info");
+          triggerToast(tRef.current.retryCardOther(data.userName), "info");
         }
       }
 
@@ -149,9 +156,9 @@ export const useGameplaySocket = (
       }
 
       if (data.playerId === socket.id) {
-        triggerToast("Kártya eldobva. Húzz egy újat!", "info");
+        triggerToast(tRef.current.cardDiscardedYou, "info");
       } else {
-        triggerToast(`${data.playerName} eldobta a kártyát.`, "info");
+        triggerToast(tRef.current.cardDiscardedOther(data.playerName), "info");
       }
     };
 
@@ -192,11 +199,11 @@ export const useGameplaySocket = (
       setGameMessage({
         text: isSoloGame
           ? data.success
-            ? `HELYES TIPP!`
-            : `HELYTELEN TIPP!`
+            ? tRef.current.correctGuess
+            : tRef.current.wrongGuess
           : data.success
-            ? `${data.playerName} JÓL TIPPELT!`
-            : `${data.playerName} ELRONTOTTA!`,
+            ? tRef.current.multiCorrectGuess(data.playerName)
+            : tRef.current.multiWrongGuess(data.playerName),
         status: data.success ? "success" : "error",
         bonusPoints: data.bonusPoints,
         pointsEarned: data.pointsEarned,
@@ -220,8 +227,8 @@ export const useGameplaySocket = (
           if (data.isGameOver) {
             setGameMessage({
               text: isSoloGame
-                ? "JÁTÉK VÉGE! Eredmény betöltése..."
-                : "JÁTÉK VÉGE! Eredmények betöltése...",
+                ? tRef.current.gameOverSolo
+                : tRef.current.gameOverMulti,
               status: "gameOver",
             });
             return;
@@ -229,7 +236,7 @@ export const useGameplaySocket = (
 
           if (data.isLastRoundImminent) {
             setGameMessage({
-              text: "UTOLSÓ FORDULÓ!",
+              text: tRef.current.lastRound,
               status: "lastRound",
             });
 
@@ -341,7 +348,7 @@ export const useGameplaySocket = (
   const startGame = useCallback((playersLength: number) => {
     if (playersLength < 2) {
       triggerToast(
-        "A többjátékos módhoz legalább 2 játékosra van szükség!",
+        tRef.current.needMorePlayers,
         "error",
       );
       return;

@@ -68,6 +68,7 @@ export interface RoomConfigData {
   targetLength: number;
   maxMistakes: number | null;
   syncMusic: boolean;
+  songLibrary?: 'hu' | 'en';
 }
 
 export * from "./game";

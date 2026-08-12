@@ -49,6 +49,7 @@ export const useGameSocket = () => {
     isWeekly: roomSocket.isWeekly,
     weeklyElapsedMs: roomSocket.weeklyElapsedMs,
     syncMusic: roomSocket.syncMusic,
+    songLibrary: roomSocket.songLibrary,
     error: roomSocket.error,
     toast: roomSocket.toast,
     setRoomCode: roomSocket.setRoomCode,

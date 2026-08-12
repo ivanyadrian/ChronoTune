@@ -2,6 +2,7 @@ import React from "react";
 import { Heart, Flame } from "lucide-react";
 import type { Player } from "../../../types";
 import LeaveGameButton from "../../../components/ui/LeaveGameButton";
+import { useLanguage } from "../../../context/LanguageContext";
 
 interface SoloGameStatsProps {
   isSolo: boolean;
@@ -20,6 +21,7 @@ const SoloGameStats: React.FC<SoloGameStatsProps> = ({
   maxMistakes,
   onLeaveGame,
 }) => {
+  const { t } = useLanguage();
   if (!isSolo || !me) return null;
 
   const FORCE_DELTA = false;
@@ -33,7 +35,7 @@ const SoloGameStats: React.FC<SoloGameStatsProps> = ({
           <div className="flex w-1/2 xs:w-full justify-start order-1">
             <div className="flex flex-col items-start justify-center">
               <span className="text-[8px] sm:text-xxs uppercase font-archivo tracking-[0.2em] text-white/40">
-                FORDULÓ
+                {t.round}
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-2xl sm:text-4xl font-archivo text-white drop-shadow-lg">
@@ -82,7 +84,7 @@ const SoloGameStats: React.FC<SoloGameStatsProps> = ({
               {/* LEFT: Static label */}
               <div className="flex items-center px-3">
                 <span className="text-[9px] sm:text-xs uppercase tracking-[0.2em] text-white/40 font-archivo">
-                  Pontszám
+                  {t.score}
                 </span>
               </div>
 

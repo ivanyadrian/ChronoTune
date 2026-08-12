@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { socket } from "../socket";
 import type { RoomConfigData } from "../types";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import { getStoredWeeklyRunId } from "../utils/storageUtils";
+import { useLanguage } from "../context/LanguageContext";
 
 export const useRoomSocket = () => {
+  const { t } = useLanguage();
+  // Use a ref so socket handlers always have the latest translations
+  // without needing to re-register listeners on every language change
+  const tRef = useRef(t);
+  useEffect(() => { tRef.current = t; }, [t]);
+
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [isHost, setIsHost] = useState(false);
@@ -14,6 +21,7 @@ export const useRoomSocket = () => {
   const [isWeekly, setIsWeekly] = useState(false);
   const [weeklyElapsedMs, setWeeklyElapsedMs] = useState(0);
   const [syncMusic, setSyncMusic] = useState(true);
+  const [songLibrary, setSongLibrary] = useState<'hu' | 'en'>('hu');
   const [error, setError] = useState("");
   const [toast, setToast] = useState<{
     message: string;
@@ -54,6 +62,7 @@ export const useRoomSocket = () => {
     setIsSolo(false);
     setIsWeekly(false);
     setWeeklyElapsedMs(0);
+    setSongLibrary('hu');
   }, []);
 
   useEffect(() => {
@@ -77,6 +86,7 @@ export const useRoomSocket = () => {
     const onRoomConfig = (data: RoomConfigData) => {
       if (data.targetLength) setTargetLength(data.targetLength);
       if (data.syncMusic !== undefined) setSyncMusic(data.syncMusic);
+      if (data.songLibrary) setSongLibrary(data.songLibrary);
     };
 
     const onError = (msg: string) => triggerToast(msg, "error");
@@ -85,11 +95,11 @@ export const useRoomSocket = () => {
     };
 
     const onPlayerJoined = (userName: string) => {
-      triggerToast(`${userName} csatlakozott!`, "info");
+      triggerToast(tRef.current.playerJoined(userName), "info");
     };
 
     const onPlayerLeft = (data: { playerName: string }) => {
-      triggerToast(`${data.playerName} kilépett.`, "leave");
+      triggerToast(tRef.current.playerLeft(data.playerName), "leave");
     };
 
     socket.on("connect", onConnect);
@@ -126,6 +136,7 @@ export const useRoomSocket = () => {
       isSoloParam: boolean = false,
       maxMistakesParam: number | null = null,
       syncMusicParam: boolean = true,
+      songLibraryParam: 'hu' | 'en' = 'hu',
     ) => {
       socket.emit("create_room", {
         userName,
@@ -133,6 +144,7 @@ export const useRoomSocket = () => {
         isSolo: isSoloParam,
         maxMistakes: maxMistakesParam,
         syncMusic: syncMusicParam,
+        songLibrary: songLibraryParam,
       });
     },
     [],
@@ -148,7 +160,7 @@ export const useRoomSocket = () => {
         const result = await fp.get();
         fingerprint = result.visitorId;
       } catch (err) {
-        console.error("Nem sikerült lekérni a böngésző ujjlenyomatát:", err);
+        console.error("Failed to get browser fingerprint:", err);
       }
 
       socket.emit("create_room", {
@@ -177,6 +189,7 @@ export const useRoomSocket = () => {
       targetLength?: number;
       syncMusic?: boolean;
       maxMistakes?: number | null;
+      songLibrary?: 'hu' | 'en';
     }) => {
       if (roomCode) {
         socket.emit("update_room_config", {
@@ -198,6 +211,7 @@ export const useRoomSocket = () => {
     isWeekly,
     weeklyElapsedMs,
     syncMusic,
+    songLibrary,
     error,
     toast,
     setRoomCode,
@@ -208,6 +222,7 @@ export const useRoomSocket = () => {
     setIsWeekly,
     setWeeklyElapsedMs,
     setSyncMusic,
+    setSongLibrary,
     setError,
     triggerToast,
     resetRoomState,

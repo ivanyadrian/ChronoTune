@@ -4,7 +4,9 @@ import BackButton from "../../../components/ui/BackButton";
 import RangeSlider from "../../../components/RangeSlider";
 import { MistakeModeCard } from "../components/MistakeModeCard";
 import { TimelinePreview } from "../components/TimelinePreview";
+import { SongLibrarySelector } from "../components/SongLibrarySelector";
 import { MISTAKE_MODES } from "../constants/mistakeModes";
+import { useLanguage } from "../../../context/LanguageContext";
 
 interface SoloConfigStepProps {
   userName: string;
@@ -12,6 +14,8 @@ interface SoloConfigStepProps {
   setTargetLength: (value: number) => void;
   selectedMaxMistakes: number | null | undefined;
   setSelectedMaxMistakes: (value: number | null | undefined) => void;
+  songLibrary: 'hu' | 'en';
+  setSongLibrary: (value: 'hu' | 'en') => void;
   onStart: () => void;
   onBack: () => void;
 }
@@ -22,9 +26,12 @@ export const SoloConfigStep = ({
   setTargetLength,
   selectedMaxMistakes,
   setSelectedMaxMistakes,
+  songLibrary,
+  setSongLibrary,
   onStart,
   onBack,
 }: SoloConfigStepProps) => {
+  const { t } = useLanguage();
   const activeOption = MISTAKE_MODES.find(
     (m) => m.value === selectedMaxMistakes,
   );
@@ -38,11 +45,10 @@ export const SoloConfigStep = ({
 
       <div className="flex flex-col gap-3 text-start">
         <h1 className="text-fluid-h1 font-archivo text-white tracking-tighter">
-          Testreszabás
+          {t.soloCustomize}
         </h1>
         <p className="text-fluid-p text-slate-400 max-w-md">
-          Állítsd be, hány körből álljon a kihívás. Minden körben egy újabb
-          kártyát próbálhatsz meg elhelyezni a timeline-on.
+          {t.soloCustomizeDesc}
         </p>
       </div>
 
@@ -55,11 +61,11 @@ export const SoloConfigStep = ({
               className="text-secondary fill-secondary/20 sm:w-6.5 sm:h-6.5"
             />
             <h2 className="text-base sm:text-xl font-archivo text-white tracking-widest uppercase italic">
-              Játék hossza
+              {t.soloGameLength}
             </h2>
           </div>
           <button className="flex gap-2 items-center text-slate-400 hover:text-white transition-colors text-xs sm:text-sm font-medium">
-            <span className="hidden sm:inline">Hogyan nyerhetek?</span>
+            <span className="hidden sm:inline">{t.soloHowToWin}</span>
             <Info size={18} />
           </button>
         </div>
@@ -70,7 +76,7 @@ export const SoloConfigStep = ({
               {targetLength}
             </span>
             <h3 className="text-[9px] sm:text-[10px] font-sans uppercase tracking-[0.2em] sm:tracking-[0.3em] text-slate-500 leading-none">
-              lehetőséged lesz kártyát elhelyezni
+              {t.soloCardsToPlace}
             </h3>
           </div>
           <RangeSlider
@@ -83,6 +89,12 @@ export const SoloConfigStep = ({
         </div>
       </div>
 
+
+      {/* Song Library */}
+      <div className="mt-15 sm:mt-20 w-full max-w-6xl mx-auto">
+        <SongLibrarySelector value={songLibrary} onChange={setSongLibrary} />
+      </div>
+
       {/* Mistake limit */}
       <div className="mt-15 sm:mt-20 w-full max-w-6xl mx-auto">
         <div className="flex gap-2 sm:gap-3 items-center mb-6">
@@ -91,7 +103,7 @@ export const SoloConfigStep = ({
             className="text-secondary fill-secondary/20 sm:w-6.5 sm:h-6.5"
           />
           <h2 className="text-sm sm:text-xl font-archivo text-white tracking-widest uppercase italic">
-            Hibahatár beállítása
+            {t.soloMistakeLimit}
           </h2>
         </div>
 
@@ -113,7 +125,7 @@ export const SoloConfigStep = ({
             <p
               className={`text-xs sm:text-base italic font-medium tracking-wide transition-colors duration-300 ${activeOption.colorClass}`}
             >
-              {activeOption.desc}
+              {t[activeOption.descKey]}
             </p>
           </div>
         ) : (
@@ -121,7 +133,7 @@ export const SoloConfigStep = ({
             className="mt-4 sm:mt-8 px-4 py-3 bg-white/5 border-l-4 border-slate-500/30 rounded-r-xl transition-all duration-500"
           >
             <p className="text-xs sm:text-base italic font-medium tracking-wide text-slate-400">
-              Válassz ki egy hibahatárt a folytatáshoz!
+              {t.soloSelectMistake}
             </p>
           </div>
         )}
@@ -135,7 +147,7 @@ export const SoloConfigStep = ({
           </h2>
           <div className="w-fit flex justify-center items-center border-2 border-primary/30 rounded-full px-3 sm:px-5 py-1.5 sm:py-2 bg-primary/5 shadow-[0_0_15px] shadow-primary/20">
             <span className="text-primary font-archivo text-xs sm:text-sm uppercase tracking-wider">
-              {targetLength} kártya
+              {targetLength} {t.soloCards}
             </span>
           </div>
         </div>
@@ -152,7 +164,7 @@ export const SoloConfigStep = ({
           className="w-[clamp(1rem,2vw,1.25rem)] fill-white"
           strokeWidth={3}
         />
-        Játék Indítása
+        {t.startGame}
       </button>
     </div>
   );

@@ -33,6 +33,7 @@ export interface Room {
   turnLocked: boolean;
   maxMistakes: number | null;
   syncMusic: boolean;
+  songLibrary: 'hu' | 'en';
   activeCard?: Song;
   playbackState: number;
   currentPlayingDeezerId: string | null;

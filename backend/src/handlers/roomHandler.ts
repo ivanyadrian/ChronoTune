@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import type { Room, Song } from "../types.js";
-import hungarianSongs from "../data/songs.json" with { type: "json" };
+import hungarianSongs from "../data/hu_songs.json" with { type: "json" };
+import englishSongs from "../data/en_songs.json" with { type: "json" };
 import { shuffle } from "../utils/shuffle.js";
 import { PLAYBACK_STATE } from "../constants/index.js";
 import { WeeklyChallenge } from "../db.js";
@@ -17,6 +18,7 @@ interface CreateRoomData {
   isSolo?: boolean;
   maxMistakes?: number | null;
   syncMusic?: boolean;
+  songLibrary?: 'hu' | 'en';
   isWeekly?: boolean;
   runId?: string;
   fingerprint?: string;
@@ -114,6 +116,11 @@ const validateCreateRoomPayload = (
     return false;
   }
 
+  if (data.songLibrary !== undefined && data.songLibrary !== 'hu' && data.songLibrary !== 'en') {
+    socket.emit("error", "Érvénytelen dalkönyvtár!");
+    return false;
+  }
+
   return true;
 };
 
@@ -166,6 +173,7 @@ const handleWeeklyRoomCreation = async (
       turnLocked: false,
       maxMistakes: null,
       syncMusic: data.syncMusic ?? true,
+      songLibrary: 'hu',
       activeCard: undefined,
       playbackState: PLAYBACK_STATE.STOPPED,
       currentPlayingDeezerId: null,
@@ -254,16 +262,19 @@ const handleStandardRoomCreation = (
   roomsData: Record<string, Room>,
 ) => {
   const maxMistakes = data.maxMistakes !== undefined ? data.maxMistakes : null;
+  const songLibrary = data.songLibrary ?? 'hu';
+  const songs = songLibrary === 'en' ? englishSongs : hungarianSongs;
 
   const newRoom: Room = {
     players: [createPlayerObject(socket.id, data.userName)],
     targetLength: data.targetLength,
-    deck: shuffle(hungarianSongs),
+    deck: shuffle(songs as Song[]),
     gameStarted: data.isSolo || false,
     turnIndex: 0,
     turnLocked: false,
     maxMistakes,
     syncMusic: data.syncMusic ?? true,
+    songLibrary,
     activeCard: undefined,
     playbackState: PLAYBACK_STATE.STOPPED,
     currentPlayingDeezerId: null,
@@ -273,7 +284,7 @@ const handleStandardRoomCreation = (
 
   if (data.isSolo) {
     const pDeck = generatePersonalDeck(
-      hungarianSongs,
+      songs as Song[],
       newRoom.targetLength + 1,
     );
     newRoom.players[0].personalDeck = pDeck;
@@ -299,6 +310,7 @@ const handleStandardRoomCreation = (
       targetLength: newRoom.targetLength,
       maxMistakes: newRoom.maxMistakes,
       syncMusic: newRoom.syncMusic,
+      songLibrary: newRoom.songLibrary,
     });
   }
 };
@@ -361,6 +373,7 @@ export const handleLeaveRoom = (
       targetLength: room.targetLength,
       maxMistakes: room.maxMistakes,
       syncMusic: room.syncMusic,
+      songLibrary: room.songLibrary,
     });
   }
 
@@ -444,6 +457,7 @@ export const registerRoomHandlers = (
       targetLength: room.targetLength,
       maxMistakes: room.maxMistakes,
       syncMusic: room.syncMusic,
+      songLibrary: room.songLibrary,
     });
 
     io.to(data.code).emit(
@@ -461,6 +475,7 @@ export const registerRoomHandlers = (
       targetLength?: number;
       syncMusic?: boolean;
       maxMistakes?: number | null;
+      songLibrary?: 'hu' | 'en';
     }) => {
       const room = roomsData[data.roomCode];
       if (!room) return;
@@ -496,11 +511,19 @@ export const registerRoomHandlers = (
         }
         room.maxMistakes = data.maxMistakes;
       }
+      if (data.songLibrary !== undefined) {
+        if (data.songLibrary !== 'hu' && data.songLibrary !== 'en') {
+          socket.emit("error", "Érvénytelen dalkönyvtár!");
+          return;
+        }
+        room.songLibrary = data.songLibrary;
+      }
 
       io.to(data.roomCode).emit("room_config_updated", {
         targetLength: room.targetLength,
         maxMistakes: room.maxMistakes,
         syncMusic: room.syncMusic,
+        songLibrary: room.songLibrary,
       });
     },
   );
@@ -520,14 +543,16 @@ export const registerRoomHandlers = (
       return;
     }
 
+    const songs = room.songLibrary === 'en' ? englishSongs : hungarianSongs;
+
     room.gameStarted = true;
     room.turnIndex = 0;
     room.turnLocked = false;
-    room.deck = shuffle(hungarianSongs);
+    room.deck = shuffle(songs as Song[]);
 
     // Every player gets a deck
     room.players.forEach((player) => {
-      const pDeck = generatePersonalDeck(hungarianSongs, room.targetLength + 1);
+      const pDeck = generatePersonalDeck(songs as Song[], room.targetLength + 1);
       player.personalDeck = pDeck;
       const startCard = player.personalDeck.pop();
       if (startCard) {

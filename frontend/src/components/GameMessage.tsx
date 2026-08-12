@@ -1,3 +1,5 @@
+import { useLanguage } from "../context/LanguageContext";
+
 interface GameMessageProps {
   message: {
     text: string;
@@ -12,6 +14,7 @@ interface GameMessageProps {
 }
 
 export const GameMessage = ({ message, nextPlayerName, isWeekly }: GameMessageProps) => {
+  const { t } = useLanguage();
   if (!message) return null;
 
   const isInformation =
@@ -78,7 +81,7 @@ export const GameMessage = ({ message, nextPlayerName, isWeekly }: GameMessagePr
 
                   {/* always shown */}
                   <span className="text-white/60 text-2xl sm:text-4xl font-archivo not-italic uppercase">
-                    pont
+                    {t.points}
                   </span>
                 </div>
               )}
@@ -101,7 +104,7 @@ export const GameMessage = ({ message, nextPlayerName, isWeekly }: GameMessagePr
                   </div>
 
                   <span className="text-white/60 text-2xl sm:text-4xl font-archivo not-italic uppercase">
-                    pont
+                    {t.points}
                   </span>
                 </div>
               )}
@@ -112,7 +115,7 @@ export const GameMessage = ({ message, nextPlayerName, isWeekly }: GameMessagePr
             <div className="flex flex-col items-center gap-2 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-300">
               <div className="h-px w-20 bg-white/10 mb-2" />
               <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
-                Soron következő:
+                {t.nextPlayer}
               </span>
               <span className="text-3xl sm:text-5xl font-archivo text-white italic uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                 {nextPlayerName}

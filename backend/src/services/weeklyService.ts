@@ -241,14 +241,14 @@ export function generateWeeklyChallengeDeck(songs: Song[], targetLength: number 
   return deck;
 }
 
-// Read songs.json
+// Read weekly_challenge_songs.json
 function loadSongs(): Song[] {
-  const songsPath = path.join(__dirname, "../data/songs.json");
+  const songsPath = path.join(__dirname, "../data/weekly_challenge_songs.json");
   try {
     const rawData = fs.readFileSync(songsPath, "utf-8");
     return JSON.parse(rawData);
   } catch (error) {
-    console.error("Hiba a songs.json beolvasása közben:", error);
+    console.error("Hiba a weekly_challenge_songs.json beolvasása közben:", error);
     return [];
   }
 }

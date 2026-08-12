@@ -6,6 +6,7 @@ import { Badge } from "../../components/ui/Badge";
 import { socket } from "../../socket";
 import { getMistakeColor } from "../../utils/scoreUtils";
 import { formatDuration } from "../../utils/timeUtils";
+import { useLanguage } from "../../context/LanguageContext";
 
 interface GameResultViewProps {
   winner: {
@@ -37,6 +38,7 @@ export const GameResultView = ({
   isSolo = true,
   players = [],
 }: GameResultViewProps) => {
+  const { t } = useLanguage();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const sortedPlayers = useMemo(() => {
@@ -89,12 +91,12 @@ export const GameResultView = ({
           <div className="flex-1 w-full max-w-xl flex flex-col items-center justify-center text-center py-12">
             <h1 className="text-4xl lg:text-6xl font-bold mb-4 flex items-center justify-center gap-3 font-archivo">
               {winner.isWeekly ? (
-                "Kihívás teljesítve!"
+                t.resultWeeklyDone
               ) : isSolo ? (
                 lost ? (
-                  "Vereség!"
+                  t.resultLost
                 ) : (
-                  "Győzelem!"
+                  t.resultWon
                 )
               ) : (
                 <>
@@ -112,18 +114,18 @@ export const GameResultView = ({
             <div className="w-full max-w-sm mb-12">
               {winner.isWeekly ? (
                 <p className="text-zinc-400 text-fluid-p">
-                  Sikeresen teljesítetted a heti kihívást! Az elért eredményedet automatikusan elmentettük a dicsőségtáblára.
+                  {t.resultWeeklySuccess}
                 </p>
               ) : isSolo ? (
                 <p className="text-zinc-400 text-fluid-p">
                   {lost
-                    ? "Elvesztetted az összes életed az utolsó forduló előtt."
-                    : "Sikeresen eljutottál az utolsó fordulóig."}
+                    ? t.resultSoloLost
+                    : t.resultSoloWon}
                 </p>
               ) : (
                 <div className="relative group mx-auto">
                   <label className="block text-[10px] font-archivo text-slate-500 uppercase tracking-[0.3em] mb-3">
-                    Játékos kiválasztása
+                    {t.resultSelectPlayer}
                   </label>
                   <div className="relative">
                     <select
@@ -143,7 +145,7 @@ export const GameResultView = ({
                             className="bg-bg-dark text-white text-base text-center cursor-pointer"
                           >
                             {player.name}
-                            {player.id === socket.id ? " (TE)" : ""}
+                            {player.id === socket.id ? ` ${t.resultYou}` : ""}
                           </option>
                         ))}
                     </select>
@@ -162,7 +164,7 @@ export const GameResultView = ({
             <div className="grid grid-cols-1 min-[300px]:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 w-full mb-10">
               <div className="col-span-1 min-[300px]:col-span-2 sm:col-span-1 rounded-3xl border border-white/5 bg-white/5 p-4 md:p-6 backdrop-blur flex flex-col justify-center items-center">
                 <p className="text-zinc-400 text-[10px] md:text-sm mb-2 uppercase font-archivo">
-                  {winner.isWeekly ? "Játékidő" : "Pontszám"}
+                  {winner.isWeekly ? t.resultPlayTime : t.resultScore}
                 </p>
                 <p className="text-3xl md:text-4xl font-archivo text-secondary-light">
                   {winner.isWeekly && typeof winner.weeklyTimeInSeconds === "number"
@@ -173,7 +175,7 @@ export const GameResultView = ({
 
                <div className="col-span-1 rounded-3xl border border-white/5 bg-white/5 p-3 md:p-6 backdrop-blur flex flex-col justify-center items-center">
                   <p className="text-zinc-400 text-[10px] md:text-sm mb-2 uppercase font-archivo">
-                    {winner.isWeekly ? "Sikeres" : "Timeline hossza"}
+                    {winner.isWeekly ? t.resultCorrect : t.resultTimelineLength}
                   </p>
                   <p className="text-3xl md:text-4xl font-archivo text-blue-400">
                     {winner.isWeekly 
@@ -185,7 +187,7 @@ export const GameResultView = ({
 
               <div className="col-span-1 rounded-3xl border border-white/5 bg-white/5 p-3 md:p-6 backdrop-blur flex flex-col justify-center items-center">
                 <p className="text-zinc-400 text-[10px] md:text-sm mb-2 uppercase font-archivo">
-                  Hibák
+                  {t.resultMistakes}
                 </p>
                 <div className="flex items-baseline gap-1">
                   <span
@@ -228,10 +230,10 @@ export const GameResultView = ({
             <div className="flex flex-col sm:flex-row gap-4 w-full">
               {winner.isWeekly ? (
                   <button
-                    onClick={onLeave} // Both options share the back navigation callback
+                    onClick={onLeave}
                     className="flex-1 rounded-full font-archivo bg-linear-to-r from-(--primary) to-[color-mix(in_srgb,var(--primary)_70%,black)] py-4 font-semibold text-lg shadow-[0_0_30px] shadow-primary/45 hover:scale-[1.02] transition cursor-pointer text-white"
                   >
-                    Vissza a ranglistához
+                    {t.resultBackToLeaderboard}
                   </button>
               ) : (
                 <>
@@ -240,14 +242,14 @@ export const GameResultView = ({
                       onClick={onRestart}
                       className="flex-1 rounded-full bg-linear-to-r from-(--primary) to-[color-mix(in_srgb,var(--primary)_70%,black)] py-4 font-semibold text-lg shadow-[0_0_30px] shadow-primary/45 hover:scale-[1.02] transition cursor-pointer text-white"
                     >
-                      Újra játszom
+                      {t.resultPlayAgain}
                     </button>
                   )}
                   <button
                     onClick={onLeave}
                     className="flex-1 rounded-full bg-white/10 border border-white/10 py-4 font-semibold text-lg hover:bg-white/15 transition cursor-pointer text-white"
                   >
-                    Kilépés
+                    {t.resultLeave}
                   </button>
                 </>
               )}
@@ -261,13 +263,13 @@ export const GameResultView = ({
             timeline={activePlayer.timeline}
             title={
               isSolo && lost
-                ? "Timeline Megszakítva"
-                : `${activePlayer.name} Timeline-ja`
+                ? t.timelineBroken
+                : `${activePlayer.name} ${t.timelineOf}`
             }
             subtitle={
               isSolo && lost
-                ? `A játék alatt elért timeline:`
-                : `A létrehozott sorrend: ${activePlayer.timeline[0]?.year || "?"} — ${activePlayer.timeline[activePlayer.timeline.length - 1]?.year || "?"}`
+                ? t.timelineReached
+                : `${t.timelineOrder} ${activePlayer.timeline[0]?.year || "?"} — ${activePlayer.timeline[activePlayer.timeline.length - 1]?.year || "?"}`
             }
           />
         </div>

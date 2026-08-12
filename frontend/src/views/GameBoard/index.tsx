@@ -124,7 +124,7 @@ export const GameBoard = ({ gameState, actions, socketId }: GameBoardProps) => {
   }, [pendingIndex, isMyTurn, roomCode, onUpdatePending]);
 
   return (
-    <div className="mx-auto w-full max-w-420">
+    <div className="mx-auto w-full max-w-420 pb-36 sm:pb-44">
       <DiscardConfirmModal
         isOpen={showDiscardConfirm}
         onClose={() => setShowDiscardConfirm(false)}
@@ -198,32 +198,35 @@ export const GameBoard = ({ gameState, actions, socketId }: GameBoardProps) => {
             />
           )}
 
-          <div className="flex flex-col sm:flex-row items-center w-full p-2 gap-6 sm:gap-0 justify-center -mt-10">
-            {currentSong && (
-              <MusicPlayer
-                currentSong={currentSong}
-                playbackState={playbackState}
-                setPlaybackState={setPlaybackState}
-                seekTo={resolvedMusicSeekTo}
-                onSeek={handleSeek}
-                handleTogglePlay={handleTogglePlay}
-                isMyTurn={isMyTurn}
-                syncMusic={syncMusic}
-                onCardMouseDown={isMyTurn && pendingIndex === null ? startDrag : undefined}
-                isDraggable={isMyTurn && pendingIndex === null}
-                canDiscard={isMyTurn}
-                onDiscard={() => setShowDiscardConfirm(true)}
-                isWeekly={isWeekly}
-              />
-            )}
+          {/* Fixed Bottom Player / Draw Music Button Container */}
+          <div className="fixed bottom-3 sm:bottom-6 left-0 right-0 z-40 flex justify-center pointer-events-none px-4">
+            <div className="pointer-events-auto flex items-center justify-center w-full max-w-70 sm:max-w-2xl">
+              {currentSong && (
+                <MusicPlayer
+                  currentSong={currentSong}
+                  playbackState={playbackState}
+                  setPlaybackState={setPlaybackState}
+                  seekTo={resolvedMusicSeekTo}
+                  onSeek={handleSeek}
+                  handleTogglePlay={handleTogglePlay}
+                  isMyTurn={isMyTurn}
+                  syncMusic={syncMusic}
+                  onCardMouseDown={isMyTurn && pendingIndex === null ? startDrag : undefined}
+                  isDraggable={isMyTurn && pendingIndex === null}
+                  canDiscard={isMyTurn}
+                  onDiscard={() => setShowDiscardConfirm(true)}
+                  isWeekly={isWeekly}
+                />
+              )}
 
-            {!currentSong && (isSolo ? isMyTurn : true) && (
-              <DrawMusicButton
-                onClick={drawCard}
-                disabled={!isMyTurn}
-                waitingForName={!isSolo && !isMyTurn && activePlayer ? activePlayer.name : null}
-              />
-            )}
+              {!currentSong && (isSolo ? isMyTurn : true) && (
+                <DrawMusicButton
+                  onClick={drawCard}
+                  disabled={!isMyTurn}
+                  waitingForName={!isSolo && !isMyTurn && activePlayer ? activePlayer.name : null}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

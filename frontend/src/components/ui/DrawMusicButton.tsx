@@ -1,3 +1,5 @@
+import { useLanguage } from "../../context/LanguageContext";
+
 interface DrawMusicButtonProps {
   onClick: () => void;
   disabled?: boolean;
@@ -9,6 +11,8 @@ export const DrawMusicButton = ({
   disabled,
   waitingForName,
 }: DrawMusicButtonProps) => {
+  const { t } = useLanguage();
+
   return (
     <div
       className={`relative group ${disabled ? "opacity-50 grayscale pointer-events-none" : ""}`}
@@ -41,13 +45,13 @@ export const DrawMusicButton = ({
 
           <div className="relative z-10 flex flex-col items-center">
             <span className="text-white font-archivo text-fluid-h2 uppercase italic tracking-tighter leading-none">
-              {waitingForName ? "Várakozás" : "Új dal"}
+              {waitingForName ? t.drawWaiting : t.drawNewSong}
             </span>
 
             <span className="text-primary font-archivo uppercase tracking-widest mt-2 opacity-90 text-fluid-badge">
               {waitingForName
-                ? `${waitingForName.length > 8 ? `${waitingForName.slice(0, 8)}...` : waitingForName} köre`
-                : "Húzása a pakliból"}
+                ? `${waitingForName.length > 8 ? `${waitingForName.slice(0, 8)}...` : waitingForName} ${t.drawTurn}`
+                : t.drawFrom}
             </span>
           </div>
         </button>

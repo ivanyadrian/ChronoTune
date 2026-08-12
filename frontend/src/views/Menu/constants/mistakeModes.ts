@@ -1,9 +1,25 @@
+import type { Translations } from "../../../i18n";
+
+export interface MistakeModeItem {
+  id: string;
+  value: number | null;
+  label: string;
+  descKey: keyof Translations;
+  colorClass: string;
+  fillClass: string;
+  borderClass: string;
+  badgeClass: string;
+  activeGlow: string;
+  glowBg: string;
+  activeBg: string;
+}
+
 export const MISTAKE_MODES = [
   {
     id: "hardcore",
     value: 1,
     label: "HARDCORE",
-    desc: "Egyetlen hiba, és a játék azonnal véget ér.",
+    descKey: "mistakeModeHardcoreDesc",
     colorClass: "text-red-500",
     fillClass: "fill-red-500",
     borderClass: "border-red-500/50",
@@ -16,7 +32,7 @@ export const MISTAKE_MODES = [
     id: "normal",
     value: 3,
     label: "NORMAL",
-    desc: "A 3. hiba után a játék véget ér!",
+    descKey: "mistakeModeNormalDesc",
     colorClass: "text-orange-500",
     fillClass: "fill-orange-500",
     borderClass: "border-orange-500/50",
@@ -29,7 +45,7 @@ export const MISTAKE_MODES = [
     id: "easy",
     value: 5,
     label: "EASY",
-    desc: "Az 5. hiba után a játék véget ér!",
+    descKey: "mistakeModeEasyDesc",
     colorClass: "text-green-500",
     fillClass: "fill-green-500",
     borderClass: "border-green-500/50",
@@ -42,7 +58,7 @@ export const MISTAKE_MODES = [
     id: "relaxed",
     value: null,
     label: "RELAXED",
-    desc: "Nincs hibakorlát!",
+    descKey: "mistakeModeRelaxedDesc",
     colorClass: "text-blue-300",
     fillClass: "fill-blue-300",
     borderClass: "border-blue-300/50",

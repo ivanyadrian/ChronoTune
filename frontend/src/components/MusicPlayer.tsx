@@ -8,10 +8,12 @@ import {
   RotateCw,
   RotateCcw,
   Trash,
+  Loader2,
 } from "lucide-react";
 import { getApiUrl } from "../utils/apiUtils";
 import { getStoredVolume, setStoredVolume } from "../utils/storageUtils";
 import { AudioVisualizer } from "./ui/AudioVisualizer";
+import { useLanguage } from "../context/LanguageContext";
 
 export const MusicPlayer = ({
   currentSong,
@@ -38,6 +40,8 @@ export const MusicPlayer = ({
   const [volume, setVolume] = useState<number>(() => getStoredVolume(50));
   const [previousVolume, setPreviousVolume] = useState<number>(volume);
   const [isMuted, setIsMuted] = useState(false);
+
+  const { t } = useLanguage();
 
   // Check if mobile
   useEffect(() => {
@@ -81,7 +85,7 @@ export const MusicPlayer = ({
           audioRef.current.src = secureAudioUrl;
           audioRef.current.load();
 
-          if (audioRef.current.readyState >= 3) {
+          if (audioRef.current.readyState >= 2) {
             setIsReady(true);
           }
         } else {
@@ -168,7 +172,7 @@ export const MusicPlayer = ({
 
   return (
     <div
-      className="w-full max-w-70 sm:max-w-2xl"
+      className="w-full max-w-120 md:max-w-2xl"
       onMouseDown={onCardMouseDown}
       style={{ cursor: isDraggable ? "grab" : "active", userSelect: "none" }}
     >
@@ -210,7 +214,7 @@ export const MusicPlayer = ({
         {/* MAIN LAYOUT: Column on mobile (flex-col), row on desktop (sm:flex-row) */}
         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8">
           {/* 1. BAKELIT */}
-          <div className="hidden sm:flex shrink-0 flex-col items-center group/vinyl">
+          <div className="hidden md:flex shrink-0 flex-col items-center group/vinyl">
             <div className="w-32 h-32 sm:w-36 sm:h-36 bg-black rounded-full flex items-center justify-center shadow-2xl border-4 border-neutral-900 relative">
               {/* Vinyl */}
               <div
@@ -256,7 +260,7 @@ export const MusicPlayer = ({
           </div>
 
           {/* Divider line - desktop only */}
-          <div className="hidden sm:block w-1 h-32 bg-white/10 rounded-full" />
+          <div className="hidden md:block w-1 h-32 bg-white/10 rounded-full" />
 
           {/* 2. CONTROLS (Timeline + Buttons) */}
           <div className="grow w-full flex flex-col items-center gap-5 sm:gap-6">
@@ -294,7 +298,7 @@ export const MusicPlayer = ({
                     onSeek(newTime);
                   }
                 }}
-                disabled={!canControl}
+                disabled={!canControl || !isReady}
                 className="relative p-2 group/seek text-white/70 hover:text-primary disabled:hover:text-white/70 transition-colors active:scale-90 disabled:active:scale-100 disabled:opacity-20 disabled:cursor-not-allowed"
               >
                 <RotateCcw className="w-6 h-6 sm:w-7 sm:h-7" />
@@ -306,10 +310,12 @@ export const MusicPlayer = ({
               <button
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={handleTogglePlay}
-                disabled={!canControl}
+                disabled={!canControl || !isReady}
                 className="w-14 h-14 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center shadow-[0_0_30px] shadow-primary/40 hover:scale-110 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:scale-100 disabled:grayscale disabled:cursor-not-allowed"
               >
-                {playbackState === 1 ? (
+                {!isReady ? (
+                  <Loader2 className="w-6 h-6 sm:w-7 sm:h-7 text-white animate-spin" />
+                ) : playbackState === 1 ? (
                   <Pause
                     className="w-6 h-6 sm:w-7 sm:h-7 text-white"
                     fill="white"
@@ -333,7 +339,7 @@ export const MusicPlayer = ({
                     onSeek(newTime);
                   }
                 }}
-                disabled={!canControl}
+                disabled={!canControl || !isReady}
                 className="relative group/seek p-2 text-white/70 hover:text-primary disabled:hover:text-white/70 transition-colors active:scale-90 disabled:active:scale-100 disabled:opacity-20 disabled:cursor-not-allowed"
               >
                 <RotateCw className="w-6 h-6 sm:w-7 sm:h-7" />
@@ -421,7 +427,7 @@ export const MusicPlayer = ({
 
         <div className="mt-6 sm:mt-3 text-center border-t border-white/5 pt-4">
           <p className="text-[clamp(7px,1.5vw,10px)] font-archivo text-slate-500 uppercase tracking-[0.2em] opacity-80">
-            {canControl ? "Helyezd a kártyát a megfelelő helyre!" : "\u00A0"}
+            {canControl ? t.placeCardInstruction : "\u00A0"}
           </p>
         </div>
 
@@ -438,6 +444,8 @@ export const MusicPlayer = ({
         }
         crossOrigin="anonymous"
         onCanPlay={() => setIsReady(true)}
+        onCanPlayThrough={() => setIsReady(true)}
+        onLoadedData={() => setIsReady(true)}
         onEnded={() => {
           setPlaybackState(0);
           setProgress(0);

@@ -15,6 +15,8 @@ import RangeSlider from "../../components/RangeSlider";
 import type { ReactNode } from "react";
 import { useState, useRef, useEffect } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { useLanguage } from "../../context/LanguageContext";
+import { SongLibrarySelector } from "../Menu/components/SongLibrarySelector";
 
 interface LobbyViewProps {
   roomCode: string;
@@ -23,8 +25,10 @@ interface LobbyViewProps {
   currentUserName: string;
   targetLength: number;
   syncMusic: boolean;
+  songLibrary: 'hu' | 'en';
   onSyncMusicChange: (val: boolean) => void;
   onTargetLengthChange: (val: number) => void;
+  onSongLibraryChange: (val: 'hu' | 'en') => void;
   onShowToast: (
     message: string,
     type?: "success" | "info" | "leave" | "error",
@@ -41,12 +45,15 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   currentUserName,
   targetLength,
   syncMusic,
+  songLibrary,
   onSyncMusicChange,
   onTargetLengthChange,
+  onSongLibraryChange,
   onShowToast,
   startGame,
   onLeave,
 }) => {
+  const { t } = useLanguage();
   const textToCopy = roomCode;
 
   // MISSING STATES
@@ -99,16 +106,16 @@ useEffect(() => {
       <div className="flex flex-col sm:flex-row items-center justify-between mb-5 w-full max-w-md mx-auto rounded-4xl bg-bg-dark border border-white/7 p-2 gap-4">
         <div className="flex flex-col gap-1 px-4 py-2 text-center sm:text-left">
           <p className="text-primary text-[0.7rem] font-archivo uppercase tracking-[0.2em]">
-            Meghívás
+            {t.lobbyInvite}
           </p>
           <p className="text-slate-400 text-[0.8rem] leading-tight sm:max-w-none">
-            Oszd meg a kódot a barátaiddal
+            {t.lobbyShareCode}
           </p>
         </div>
 
         <CopyToClipboard 
           text={textToCopy}
-          onCopy={() => onShowToast("Sikeresen másolva!", "success")}
+          onCopy={() => onShowToast(t.lobbyCopied, "success")}
         >
           <div
             className="w-full sm:w-auto rounded-3xl flex items-center justify-center bg-[#2d1b3e] border border-white/10 px-6 py-4 gap-3 cursor-pointer hover:bg-[#39224f] hover:border-primary/50 transition-all active:scale-95 group"
@@ -118,7 +125,7 @@ useEffect(() => {
               size={18}
             />
             <p className="text-white text-[0.9rem] font-bold tracking-wide whitespace-nowrap">
-              Kód másolása
+              {t.lobbyCopyCode}
             </p>
           </div>
         </CopyToClipboard>
@@ -130,7 +137,7 @@ useEffect(() => {
           <div className="flex gap-2 justify-center items-center shrink-0">
             <Users size={22} className="text-pink-500 fill-pink-500 inline-block shrink-0" />
             <p className="text-white font-extrabold text-fluid-h3">
-              Játékosok{" "}
+              {t.lobbyPlayers}{" "}
               <span className="text-pink-500 font-bold">[{players.length}]</span>
             </p>
           </div>
@@ -190,23 +197,23 @@ useEffect(() => {
             <div className="flex items-center gap-3">
               <Flag className="text-primary shrink-0" size={24} />
               <h3 className="text-white font-archivo uppercase tracking-widest text-fluid-h4">
-                Játék hossza
+                {t.lobbyGameLength}
               </h3>
             </div>
             <p className="text-slate-400 text-fluid-p max-w-md mb-7">
-              Minden játékos összesen{" "}
+              {t.lobbyTurnsDesc}{" "}
               <span className="text-primary text-lg sm:text-xl font-archivo italic leading-none drop-shadow-[0_0_10px] shadow-primary/30">
                 {targetLength} {""}
               </span>
-              alkalommal kerül sorra a játék során.
+              {t.lobbyTurnsDesc2}
               <br />
               {isHost ? (
                 <span className="text-[#46ef87] font-archivo block mt-2">
-                  Hostként módosíthatod az értékeket.
+                  {t.lobbyHostCanEdit}
                 </span>
               ) : (
                 <span className="text-[#ff0303] font-archivo block mt-2">
-                  Csak a host végezhet módosításokat!
+                  {t.lobbyOnlyHostEdit}
                 </span>
               )}
             </p>
@@ -223,12 +230,21 @@ useEffect(() => {
             />
           </div>
 
+                    {/* Song Library */}
+          <div className="mt-7">
+            <SongLibrarySelector
+              value={songLibrary}
+              onChange={onSongLibraryChange}
+              disabled={!isHost}
+            />
+          </div>
+
           <div className="flex flex-col mt-7">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-3">
                 <Repeat2 className="text-primary shrink-0" size={24} />
                 <h3 className="text-white font-archivo uppercase tracking-widest text-fluid-h4">
-                  Szinkronizált lejátszás
+                  {t.lobbySyncMusic}
                 </h3>
               </div>
 
@@ -251,8 +267,7 @@ useEffect(() => {
             </div>
 
             <p className="text-slate-400 text-sm max-w-md mt-3">
-              A szinkronizált lejátszás bekapcsolásakor a soron lévő játékos
-              irányítja mindenki zenelejátszóját.
+              {t.lobbySyncMusicDesc}
             </p>
           </div>
 
@@ -264,13 +279,13 @@ useEffect(() => {
             >
               <Play size={18} className="fill-white sm:w-5 sm:h-5" />
               <span className="text-fluid-p">
-                Játék Indítása
+                {t.lobbyStartGame}
               </span>
             </button>
 
             {!isHost && (
               <p className="text-slate-500 italic text-xs mt-3 text-center animate-pulse">
-                Csak a host végezhet módosítást és indíthatja el a játékot.
+                {t.lobbyOnlyHostStart}
               </p>
             )}
           </div>
@@ -284,7 +299,7 @@ useEffect(() => {
             size={18}
             className="hidden group-hover:block transition-all"
           />
-          <span>Kilépés a szobából</span>
+          <span>{t.lobbyLeave}</span>
         </button>
       </LeaveGameButton>
     </div>
