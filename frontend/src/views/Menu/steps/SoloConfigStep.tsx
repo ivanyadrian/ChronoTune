@@ -1,4 +1,5 @@
-import { Flag, HeartCrack, Info, Play } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Flag, HeartCrack, Play, HelpCircle, Library, User, Flame } from "lucide-react";
 import { Badge } from "../../../components/ui/Badge";
 import BackButton from "../../../components/ui/BackButton";
 import RangeSlider from "../../../components/RangeSlider";
@@ -7,6 +8,8 @@ import { TimelinePreview } from "../components/TimelinePreview";
 import { SongLibrarySelector } from "../components/SongLibrarySelector";
 import { MISTAKE_MODES } from "../constants/mistakeModes";
 import { useLanguage } from "../../../context/LanguageContext";
+import { InfoModal } from "../../../components/ui/InfoModal";
+import { STORAGE_KEYS, isTutorialHidden, setTutorialHidden } from "../../../utils/storageUtils";
 
 interface SoloConfigStepProps {
   userName: string;
@@ -32,6 +35,19 @@ export const SoloConfigStep = ({
   onBack,
 }: SoloConfigStepProps) => {
   const { t } = useLanguage();
+  const [showInfo, setShowInfo] = useState(false);
+
+  useEffect(() => {
+    if (!isTutorialHidden(STORAGE_KEYS.TUTORIAL_SOLO)) {
+      setShowInfo(true);
+    }
+  }, []);
+
+  const handleCloseInfo = (dontShowAgain: boolean) => {
+    setShowInfo(false);
+    setTutorialHidden(STORAGE_KEYS.TUTORIAL_SOLO, dontShowAgain);
+  };
+
   const activeOption = MISTAKE_MODES.find(
     (m) => m.value === selectedMaxMistakes,
   );
@@ -39,7 +55,10 @@ export const SoloConfigStep = ({
   return (
     <div className="border rounded-2xl p-4 sm:p-8 mt-3 sm:mt-0 bg-surface-dark border-secondary/20 max-w-4xl mx-auto space-y-8">
       <div className="flex justify-between items-center">
-        <Badge text="Single Player" />
+        <div className="flex items-center gap-3">
+          <Badge text="Single Player" />
+          
+        </div>
         <BackButton onClick={onBack} />
       </div>
 
@@ -64,9 +83,17 @@ export const SoloConfigStep = ({
               {t.soloGameLength}
             </h2>
           </div>
-          <button className="flex gap-2 items-center text-slate-400 hover:text-white transition-colors text-xs sm:text-sm font-medium">
-            <span className="hidden sm:inline">{t.soloHowToWin}</span>
-            <Info size={18} />
+          <button
+            onClick={() => setShowInfo(true)}
+            className="flex gap-2 items-center text-slate-400 hover:text-white transition-colors text-xs sm:text-sm font-medium cursor-pointer"
+          >
+            <button
+            onClick={() => setShowInfo(true)}
+            title={t.tutorialInfoTooltip}
+            className="p-1.5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+          >
+            <HelpCircle size={18} />
+          </button>
           </button>
         </div>
 
@@ -157,7 +184,7 @@ export const SoloConfigStep = ({
       <button
         disabled={!userName.trim() || selectedMaxMistakes === undefined}
         onClick={onStart}
-        className="font-archivo p-[clamp(0.85rem,2.5vw,1.15rem)] text-fluid-p mt-[clamp(2rem,6vw,2.5rem)] w-full rounded-full bg-primary text-white flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)] tracking-widest uppercase transition-all hover:brightness-110 hover:shadow-[0_0_20px_3px] hover:scale-102 active:scale-98 hover:shadow-primary/40 disabled:opacity-30 disabled:grayscale"
+        className="font-archivo p-[clamp(0.85rem,2.5vw,1.15rem)] text-fluid-p mt-[clamp(2rem,6vw,2.5rem)] w-full rounded-full bg-primary text-white flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)] tracking-widest uppercase transition-all hover:brightness-110 hover:shadow-[0_0_20px_3px] hover:scale-102 active:scale-98 hover:shadow-primary/40 disabled:opacity-30 disabled:grayscale cursor-pointer"
       >
         <Play
           size={20}
@@ -166,6 +193,38 @@ export const SoloConfigStep = ({
         />
         {t.startGame}
       </button>
+
+      <InfoModal
+        isOpen={showInfo}
+        onClose={handleCloseInfo}
+        storageKey={STORAGE_KEYS.TUTORIAL_SOLO}
+        title={t.tutorialSoloTitle}
+        subtitle={t.tutorialSoloSubtitle}
+        icon={<User className="w-7 h-7" />}
+        sections={[
+          {
+            icon: <Flag className="w-5 h-5" />,
+            title: t.tutorialSoloItem1Title,
+            description: t.tutorialSoloItem1Desc,
+          },
+          {
+            icon: <Flame className="w-5 h-5" />,
+            title: t.tutorialSoloItem2Title,
+            description: t.tutorialSoloItem2Desc,
+          },
+          {
+            icon: <HeartCrack className="w-5 h-5" />,
+            title: t.tutorialSoloItem3Title,
+            description: t.tutorialSoloItem3Desc,
+          },
+          {
+            icon: <Library className="w-5 h-5" />,
+            title: t.tutorialSoloItem4Title,
+            description: t.tutorialSoloItem4Desc,
+          },
+        ]}
+      />
     </div>
   );
 };
+

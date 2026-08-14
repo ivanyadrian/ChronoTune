@@ -1,5 +1,5 @@
 import { useLanguage } from "../../../context/LanguageContext";
-import { Music2 } from "lucide-react";
+import { Library } from "lucide-react";
 
 interface SongLibrarySelectorProps {
   value: 'hu' | 'en';
@@ -20,7 +20,7 @@ export const SongLibrarySelector = ({ value, onChange, disabled = false }: SongL
 
       {/* Section header */}
       <div className="flex gap-2 sm:gap-3 items-center mb-5">
-        <Music2 size={22} className="text-secondary fill-secondary/20 shrink-0" />
+        <Library size={22} className="text-secondary fill-secondary/20 shrink-0" />
         <h2 className="text-base sm:text-xl font-archivo text-white tracking-widest uppercase italic">
           {t.songLibraryLabel}
         </h2>

@@ -78,6 +78,8 @@ const en = {
   lobbyStartGame: "Start Game",
   lobbyOnlyHostStart: "Only the host can make changes and start the game.",
   lobbyLeave: "Leave Room",
+  lobbyLeaveTitle: "Leave Room?",
+  lobbyLeaveWarning: "Are you sure you want to leave the room?",
 
   // GameResult.tsx
   resultWeeklyDone: "Challenge Complete!",
@@ -198,6 +200,56 @@ const en = {
   gameOverSolo: "GAME OVER! Loading result...",
   gameOverMulti: "GAME OVER! Loading results...",
   lastRound: "LAST ROUND!",
+
+  // Tutorials / Info Modals
+  tutorialDontShowAgain: "Don't show this again",
+  tutorialGotIt: "Got it",
+  tutorialInfoTooltip: "Tutorial",
+
+  // NameStep Tutorial
+  tutorialNameTitle: "Welcome to ChronoTune!",
+  tutorialNameSubtitle: "Brief overview.",
+  tutorialNameItem1Title: "What is this game?",
+  tutorialNameItem1Desc: "ChronoTune is a timeline-building game where you place songs on the timeline according to their release year. You can listen to a 30-second snippet of each song to help you decide.",
+  tutorialNameItem2Title: "How to play?",
+  tutorialNameItem2Desc: "Listen to the music, draw a card, and place it in the correct spot on your timeline! If your guess is correct, the card stays on your timeline.",
+  tutorialNameItem3Title: "Diverse Game Modes",
+  tutorialNameItem3Desc: "Play solo at your own pace, test your skills against friends in multiplayer mode, or compete on the global weekly leaderboard!",
+
+  // Solo Tutorial
+  tutorialSoloTitle: "Single Player Mode",
+  tutorialSoloSubtitle: "Try to beat your own record!",
+  tutorialSoloItem1Title: "Game Length",
+  tutorialSoloItem1Desc: "Choose how many rounds you want to play (5–20). In each round, you receive a new song that you must place on the timeline. Correct answers earn points and add the song to the timeline. Incorrect answers deduct points and discard the song.",
+  tutorialSoloItem2Title: "Scoring & Streak",
+  tutorialSoloItem2Desc: "Each correct placement is worth +100 points. If you correctly place at least 3 songs in a row, streak mode activates: you earn +50 bonus points for the 3rd correct answer, and +20 additional bonus points for each subsequent correct placement. Beware, a wrong guess costs -15 points and resets your streak! If you make zero mistakes, you receive a +500 bonus at the end of the game.",
+  tutorialSoloItem3Title: "Mistake Tolerance",
+  tutorialSoloItem3Desc: "Set your preferred difficulty. In 'Hardcore' mode, a single mistake results in an immediate defeat, while in 'Relaxed' mode, there is no mistake limit.",
+  tutorialSoloItem4Title: "Song Library",
+  tutorialSoloItem4Desc: "Choose between Hungarian and International songs. Hungarian mode features only Hungarian-language tracks, while International mode includes songs from all around the world.",
+
+  // Multiplayer Tutorial
+  tutorialMultiTitle: "Multiplayer Mode",
+  tutorialMultiSubtitle: "Compete with your friends in real-time!",
+  tutorialMultiItem1Title: "Create & Join Room",
+  tutorialMultiItem1Desc: "Create a room and share the 4-digit room code with your friends, or join an existing room with a code.",
+  tutorialMultiItem2Title: "Turn-based Gameplay",
+  tutorialMultiItem2Desc: "Players take turns drawing cards and placing them on their timeline. The player with the highest score at the end of the game wins!",
+  tutorialMultiItem3Title: "Scoring & Streak",
+  tutorialMultiItem3Desc: "Each correct placement is worth +100 points. If you correctly place at least 3 songs in a row, streak mode activates: you earn +50 bonus points for the 3rd correct answer, and +20 additional bonus points for each subsequent correct placement. Beware, a wrong guess costs -15 points and resets your streak! If you make zero mistakes, you receive a +500 bonus at the end of the game.",
+  tutorialMultiItem4Title: "Leaving the Game",
+  tutorialMultiItem4Desc: "If a player leaves the game, the remaining players can continue without interruption. The player who left will be treated as if they had never joined.",
+
+  // Weekly Tutorial
+  tutorialWeeklyTitle: "Weekly Challenge",
+  tutorialWeeklySubtitle: "Equal conditions, 20 weekly songs, global leaderboard!",
+  tutorialWeeklyItem1Title: "Same List for Everyone",
+  tutorialWeeklyItem1Desc: "Every Monday at 12:00, a new 20-song list launches. Throughout the week, all players play with the exact same songs in the exact same order. When a new list appears, all data from the previous week is reset!",
+  tutorialWeeklyItem2Title: "Saving Game Progress",
+  tutorialWeeklyItem2Desc: "Your game progress is saved automatically, so if interrupted, you can resume right where you left off.",
+  tutorialWeeklyItem3Title: "1 Attempt Per Week",
+  tutorialWeeklyItem3Desc: "To ensure fair competition, each player can participate in the challenge only once per week. Give it your absolute best!",
 };
+
 
 export default en;

@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { Plus, Users, MoveRight } from "lucide-react";
 import BackButton from "../../../components/ui/BackButton";
+import { Badge } from "../../../components/ui/Badge";
 import { useLanguage } from "../../../context/LanguageContext";
-
 
 interface MultiplayerConfigStepProps {
   onCreateRoom: () => void;
@@ -10,8 +10,8 @@ interface MultiplayerConfigStepProps {
   onBack: () => void;
   inputCode: string;
   setInputCode: (value: string) => void;
-  songLibrary: 'hu' | 'en';
-  setSongLibrary: (value: 'hu' | 'en') => void;
+  songLibrary: "hu" | "en";
+  setSongLibrary: (value: "hu" | "en") => void;
 }
 
 export const MultiplayerConfigStep = ({
@@ -32,6 +32,10 @@ export const MultiplayerConfigStep = ({
 
   return (
     <div className="flex flex-col items-center gap-6 sm:gap-8 w-full max-w-7xl py-6 mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="w-full flex justify-center items-center px-2">
+        <Badge text="Multiplayer" />
+      </div>
+
       <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 w-full items-stretch">
         {/* Create card */}
         <div className="flex-1 bg-bg-dark/60 backdrop-blur-md border-2 border-secondary/10 rounded-[2.5rem] p-6 sm:p-12 transition-all duration-500 hover:border-primary/30 hover:shadow-[0_0_60px] shadow-primary/10 flex flex-col items-center text-center group">
@@ -55,7 +59,7 @@ export const MultiplayerConfigStep = ({
             <div className="absolute -inset-1 bg-linear-to-r from-(--primary) to-[color-mix(in_srgb,var(--primary)_80%,black)] rounded-full blur-xl opacity-20 group-hover:opacity-60 transition duration-500" />
             <button
               onClick={onCreateRoom}
-              className="relative w-full py-4 sm:py-5 px-6 sm:px-10 bg-linear-to-b from-(--primary) to-[color-mix(in_srgb,var(--primary)_80%,black)] rounded-full flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+              className="relative w-full py-4 sm:py-5 px-6 sm:px-10 bg-linear-to-b from-(--primary) to-[color-mix(in_srgb,var(--primary)_80%,black)] rounded-full flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
             >
               <span className="text-white font-archivo text-fluid-p uppercase tracking-wider">
                 {t.multiCreate}
@@ -114,10 +118,7 @@ export const MultiplayerConfigStep = ({
                       setInputCode(cleanedCode);
 
                       requestAnimationFrame(() => {
-                        const lastIndex = Math.min(
-                          cleanedCode.length - 1,
-                          3
-                        );
+                        const lastIndex = Math.min(cleanedCode.length - 1, 3);
 
                         inputRefs.current[lastIndex]?.focus();
                       });
@@ -127,18 +128,13 @@ export const MultiplayerConfigStep = ({
                     const val = e.target.value.toUpperCase();
 
                     if (/^[A-Z0-9]?$/.test(val)) {
-                      const newCode = inputCode
-                        .padEnd(4, " ")
-                        .split("");
+                      const newCode = inputCode.padEnd(4, " ").split("");
 
                       newCode[index] = val;
 
                       setInputCode(newCode.join("").trimEnd());
 
-                      if (
-                        val &&
-                        inputRefs.current[index + 1]
-                      ) {
+                      if (val && inputRefs.current[index + 1]) {
                         inputRefs.current[index + 1]?.focus();
                       }
                     }
@@ -160,15 +156,12 @@ export const MultiplayerConfigStep = ({
             <button
               onClick={handleJoin}
               disabled={!/^[A-Z0-9]{4}$/.test(inputCode)}
-              className="w-full py-4 sm:py-5 px-6 border-2 border-primary rounded-full flex items-center justify-center gap-3 transition-all hover:bg-primary/10 active:scale-95 disabled:opacity-20 disabled:grayscale"
+              className="w-full py-4 sm:py-5 px-6 border-2 border-primary rounded-full flex items-center justify-center gap-3 transition-all hover:bg-primary/10 active:scale-95 disabled:opacity-20 disabled:grayscale cursor-pointer"
             >
               <span className="text-primary font-archivo text-sm sm:text-lg uppercase tracking-wider">
                 {t.multiEnter}
               </span>
-              <MoveRight
-                size={18}
-                className="text-primary sm:w-5 sm:h-5"
-              />
+              <MoveRight size={18} className="text-primary sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
@@ -180,3 +173,4 @@ export const MultiplayerConfigStep = ({
     </div>
   );
 };
+

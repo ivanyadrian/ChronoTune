@@ -4,11 +4,15 @@ import { useLanguage } from "../../context/LanguageContext";
 
 interface LeaveGameButtonProps {
   onConfirm: () => void;
+  title?: string;
+  warning?: string;
   children?: React.ReactNode;
 }
 
 const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
   onConfirm,
+  title,
+  warning,
   children,
 }) => {
   const { t } = useLanguage();
@@ -48,11 +52,11 @@ const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
             </div>
 
             <h3 className="mb-2 text-center text-xl font-bold text-white">
-              {t.leaveTitle}
+              {title || t.leaveTitle}
             </h3>
 
             <p className="text-center mb-5 text-slate-300 italic text-fluid-p">
-              {t.leaveWarning}
+              {warning || t.leaveWarning}
             </p>
 
             <div className="flex flex-col gap-3">

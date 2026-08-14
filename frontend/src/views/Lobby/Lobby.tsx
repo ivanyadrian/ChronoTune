@@ -9,6 +9,10 @@ import {
   Repeat2,
   ChevronDown,
   ChevronUp,
+  HelpCircle,
+  RefreshCw,
+  Flame,
+  LogOut,
 } from "lucide-react";
 import LeaveGameButton from "../../components/ui/LeaveGameButton";
 import RangeSlider from "../../components/RangeSlider";
@@ -17,6 +21,12 @@ import { useState, useRef, useEffect } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useLanguage } from "../../context/LanguageContext";
 import { SongLibrarySelector } from "../Menu/components/SongLibrarySelector";
+import { InfoModal } from "../../components/ui/InfoModal";
+import {
+  STORAGE_KEYS,
+  isTutorialHidden,
+  setTutorialHidden,
+} from "../../utils/storageUtils";
 
 interface LobbyViewProps {
   roomCode: string;
@@ -25,10 +35,10 @@ interface LobbyViewProps {
   currentUserName: string;
   targetLength: number;
   syncMusic: boolean;
-  songLibrary: 'hu' | 'en';
+  songLibrary: "hu" | "en";
   onSyncMusicChange: (val: boolean) => void;
   onTargetLengthChange: (val: number) => void;
-  onSongLibraryChange: (val: 'hu' | 'en') => void;
+  onSongLibraryChange: (val: "hu" | "en") => void;
   onShowToast: (
     message: string,
     type?: "success" | "info" | "leave" | "error",
@@ -61,6 +71,20 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   const [showBottomIndicator, setShowBottomIndicator] = useState(false);
   const playerListRef = useRef<HTMLDivElement>(null);
 
+  // Info modal state
+  const [showInfo, setShowInfo] = useState(false);
+
+  useEffect(() => {
+    if (!isTutorialHidden(STORAGE_KEYS.TUTORIAL_MULTI)) {
+      setShowInfo(true);
+    }
+  }, []);
+
+  const handleCloseInfo = (dontShowAgain: boolean) => {
+    setShowInfo(false);
+    setTutorialHidden(STORAGE_KEYS.TUTORIAL_MULTI, dontShowAgain);
+  };
+
   // Checks if there is anything to scroll and where we are
   const checkScroll = () => {
     const element = playerListRef.current;
@@ -68,37 +92,40 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
     const hasScroll = element.scrollHeight > element.clientHeight;
     const atTop = element.scrollTop <= 10;
-    const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
-    
+    const atBottom =
+      element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
+
     setShowTopIndicator(hasScroll && !atTop);
     setShowBottomIndicator(hasScroll && !atBottom);
   };
 
   // Watch scrolling and new players
-useEffect(() => {
-  const element = playerListRef.current;
-  if (!element) return;
+  useEffect(() => {
+    const element = playerListRef.current;
+    if (!element) return;
 
-  // Save a small delay in a variable
-  const timer = setTimeout(checkScroll, 100);
-  
-  element.addEventListener('scroll', checkScroll);
-  
-  return () => {
-    clearTimeout(timer); 
-    element.removeEventListener('scroll', checkScroll);
-  };
-}, [players]);
+    // Save a small delay in a variable
+    const timer = setTimeout(checkScroll, 100);
+
+    element.addEventListener("scroll", checkScroll);
+
+    return () => {
+      clearTimeout(timer);
+      element.removeEventListener("scroll", checkScroll);
+    };
+  }, [players]);
 
   // Check on resize too
   useEffect(() => {
-    window.addEventListener('resize', checkScroll);
-    return () => window.removeEventListener('resize', checkScroll);
+    window.addEventListener("resize", checkScroll);
+    return () => window.removeEventListener("resize", checkScroll);
   }, []);
 
   return (
     <div className="w-full max-w-6xl my-8 px-3 xs:px-6 rounded-3xl flex flex-col items-center gap-6">
-      <Badge text="Lobby" />
+      <div className="flex items-center gap-3">
+        <Badge text="Lobby" />
+      </div>
       <h2 className="text-fluid-h1 font-mono font-extrabold text-white tracking-wide leading-none">
         {roomCode}
       </h2>
@@ -113,13 +140,11 @@ useEffect(() => {
           </p>
         </div>
 
-        <CopyToClipboard 
+        <CopyToClipboard
           text={textToCopy}
           onCopy={() => onShowToast(t.lobbyCopied, "success")}
         >
-          <div
-            className="w-full sm:w-auto rounded-3xl flex items-center justify-center bg-[#2d1b3e] border border-white/10 px-6 py-4 gap-3 cursor-pointer hover:bg-[#39224f] hover:border-primary/50 transition-all active:scale-95 group"
-          >
+          <div className="w-full sm:w-auto rounded-3xl flex items-center justify-center bg-[#2d1b3e] border border-white/10 px-6 py-4 gap-3 cursor-pointer hover:bg-[#39224f] hover:border-primary/50 transition-all active:scale-95 group">
             <Copy
               className="text-white group-hover:text-primary transition-colors"
               size={18}
@@ -135,22 +160,27 @@ useEffect(() => {
         {/* LEFT BLOCK - Player list */}
         <div className="lg:col-span-4 border-2 bg-surface-dark border-secondary/20 p-4 sm:p-6 rounded-3xl min-h-50 flex flex-col items-start text-slate-500 font-medium">
           <div className="flex gap-2 justify-center items-center shrink-0">
-            <Users size={22} className="text-pink-500 fill-pink-500 inline-block shrink-0" />
+            <Users
+              size={22}
+              className="text-pink-500 fill-pink-500 inline-block shrink-0"
+            />
             <p className="text-white font-extrabold text-fluid-h3">
               {t.lobbyPlayers}{" "}
-              <span className="text-pink-500 font-bold">[{players.length}]</span>
+              <span className="text-pink-500 font-bold">
+                [{players.length}]
+              </span>
             </p>
           </div>
-          
+
           {/* Scrollable list - relative position to the gradient */}
           <div className="relative w-full">
             {/* Top gradient */}
             {showTopIndicator && (
               <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none bg-linear-to-b from-surface-dark to-transparent z-10" />
             )}
-            
+
             {/* The list */}
-            <div 
+            <div
               ref={playerListRef}
               className="flex flex-col gap-2 mt-6 w-full overflow-y-auto max-h-50 md:max-h-115 hide-scrollbar"
             >
@@ -162,18 +192,20 @@ useEffect(() => {
                   `}
                 >
                   {player}{" "}
-                  <span className={`italic capitalize ${player === currentUserName ? "text-secondary-light" : "text-[color-mix(in_srgb,var(--primary)_45%,black)]"}`}>
+                  <span
+                    className={`italic capitalize ${player === currentUserName ? "text-secondary-light" : "text-[color-mix(in_srgb,var(--primary)_45%,black)]"}`}
+                  >
                     {index === 0 ? "host" : "player"}
                   </span>
                 </div>
               ))}
             </div>
-            
+
             {/* Bottom gradient and arrow */}
             {showBottomIndicator && (
               <>
                 <div className="absolute -bottom-1 left-0 right-0 h-16 pointer-events-none bg-linear-to-t from-surface-dark to-transparent z-10" />
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 text-white rounded-full p-2 transition-all duration-200 z-20 animate-bounce">
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 text-white rounded-full p-2 transition-all duration-200 z-20 animate-bounce">
                   <ChevronDown size={20} />
                 </div>
               </>
@@ -183,7 +215,7 @@ useEffect(() => {
             {showTopIndicator && !showBottomIndicator && (
               <>
                 <div className="absolute -top-1 left-0 right-0 h-16 pointer-events-none bg-linear-to-b from-surface-dark to-transparent z-10" />
-                  <div className="absolute top-6 left-1/2 transform -translate-x-1/2 text-white rounded-full p-2 transition-all duration-200 z-20 animate-bounce">
+                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 text-white rounded-full p-2 transition-all duration-200 z-20 animate-bounce">
                   <ChevronUp size={20} />
                 </div>
               </>
@@ -194,11 +226,21 @@ useEffect(() => {
         {/* RIGHT BLOCK - Settings */}
         <div className="lg:col-span-8 border-2 bg-surface-dark border-secondary/20 rounded-3xl p-4 sm:p-6 flex flex-col gap-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-              <Flag className="text-primary shrink-0" size={24} />
-              <h3 className="text-white font-archivo uppercase tracking-widest text-fluid-h4">
-                {t.lobbyGameLength}
-              </h3>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3">
+                <Flag className="text-primary shrink-0" size={24} />
+                <h3 className="text-white font-archivo uppercase tracking-widest text-fluid-h4">
+                  {t.lobbyGameLength}
+                </h3>
+              </div>
+
+              <button
+                onClick={() => setShowInfo(true)}
+                title={t.tutorialInfoTooltip}
+                className="p-1.5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+              >
+                <HelpCircle size={18} />
+              </button>
             </div>
             <p className="text-slate-400 text-fluid-p max-w-md mb-7">
               {t.lobbyTurnsDesc}{" "}
@@ -218,7 +260,7 @@ useEffect(() => {
               )}
             </p>
           </div>
-          
+
           <div className={!isHost ? "pointer-events-none opacity-60" : ""}>
             <RangeSlider
               min={5}
@@ -230,7 +272,7 @@ useEffect(() => {
             />
           </div>
 
-                    {/* Song Library */}
+          {/* Song Library */}
           <div className="mt-7">
             <SongLibrarySelector
               value={songLibrary}
@@ -278,9 +320,7 @@ useEffect(() => {
               className="p-3.5 font-archivo sm:p-4 bg-primary w-full rounded-full mt-7 sm:mt-10 text-white font-bold flex items-center justify-center gap-2 tracking-widest uppercase hover:brightness-110 hover:scale-102 hover:shadow-[0_0_20px_3px_rgba(239,77,255,0.4)] active:scale-105 transition-all disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
             >
               <Play size={18} className="fill-white sm:w-5 sm:h-5" />
-              <span className="text-fluid-p">
-                {t.lobbyStartGame}
-              </span>
+              <span className="text-fluid-p">{t.lobbyStartGame}</span>
             </button>
 
             {!isHost && (
@@ -292,7 +332,11 @@ useEffect(() => {
         </div>
       </div>
 
-      <LeaveGameButton onConfirm={onLeave}>
+      <LeaveGameButton
+        onConfirm={onLeave}
+        title={t.lobbyLeaveTitle}
+        warning={t.lobbyLeaveWarning}
+      >
         <button className="group w-full py-3 rounded-2xl font-bold text-sm text-slate-400 border border-slate-700 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/5 transition-all active:scale-95 flex items-center justify-center gap-2">
           <DoorClosed size={18} className="group-hover:hidden transition-all" />
           <DoorOpen
@@ -302,6 +346,32 @@ useEffect(() => {
           <span>{t.lobbyLeave}</span>
         </button>
       </LeaveGameButton>
+
+      <InfoModal
+        isOpen={showInfo}
+        onClose={handleCloseInfo}
+        storageKey={STORAGE_KEYS.TUTORIAL_MULTI}
+        title={t.tutorialMultiTitle}
+        subtitle={t.tutorialMultiSubtitle}
+        icon={<Users className="w-7 h-7" />}
+        sections={[
+          {
+            icon: <RefreshCw className="w-5 h-5" />,
+            title: t.tutorialMultiItem2Title,
+            description: t.tutorialMultiItem2Desc,
+          },
+          {
+            icon: <Flame className="w-5 h-5" />,
+            title: t.tutorialMultiItem3Title,
+            description: t.tutorialMultiItem3Desc,
+          },
+          {
+            icon: <LogOut className="w-5 h-5" />,
+            title: t.tutorialMultiItem4Title,
+            description: t.tutorialMultiItem4Desc,
+          },
+        ]}
+      />
     </div>
   );
 };

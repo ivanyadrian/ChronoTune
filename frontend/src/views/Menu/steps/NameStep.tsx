@@ -1,9 +1,12 @@
-import { AudioLines, MoveRight, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { AudioLines, MoveRight, User, HelpCircle, Music, Sparkles } from "lucide-react";
 import { Badge } from "../../../components/ui/Badge";
 import { StatItem } from "../components/StatItem";
 import { Divider } from "../components/Divider";
 import { LanguageSwitcher } from "../../../components/LanguageSwitcher";
 import { useLanguage } from "../../../context/LanguageContext";
+import { InfoModal } from "../../../components/ui/InfoModal";
+import { STORAGE_KEYS, isTutorialHidden, setTutorialHidden } from "../../../utils/storageUtils";
 
 interface NameStepProps {
   userName: string;
@@ -13,12 +16,31 @@ interface NameStepProps {
 
 export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
   const { t } = useLanguage();
+  const [showInfo, setShowInfo] = useState(false);
+
+  useEffect(() => {
+    if (!isTutorialHidden(STORAGE_KEYS.TUTORIAL_NAME)) {
+      setShowInfo(true);
+    }
+  }, []);
+
+  const handleCloseInfo = (dontShowAgain: boolean) => {
+    setShowInfo(false);
+    setTutorialHidden(STORAGE_KEYS.TUTORIAL_NAME, dontShowAgain);
+  };
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center px-4 py-8 sm:py-12">
       {/* Main container */}
       <div className="w-full max-w-2xl p-[clamp(1rem,5vw,1.125rem)] bg-surface-dark/90 backdrop-blur-xl border border-white/5 border-t-4 border-t-purple-600/40 rounded-4xl sm:rounded-[3rem] shadow-2xl flex flex-col items-center gap-[clamp(1.5rem,4vw,2.5rem)]">
-        <div className="w-full flex justify-end">
+        <div className="w-full flex justify-between items-center">
+          <button
+            onClick={() => setShowInfo(true)}
+            title={t.tutorialInfoTooltip}
+            className="p-2 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+          >
+            <HelpCircle size={18} />
+          </button>
           <LanguageSwitcher />
         </div>
 
@@ -92,6 +114,27 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
           </div>
         </div>
       </div>
+
+      <InfoModal
+        isOpen={showInfo}
+        onClose={handleCloseInfo}
+        storageKey={STORAGE_KEYS.TUTORIAL_NAME}
+        title={t.tutorialNameTitle}
+        subtitle={t.tutorialNameSubtitle}
+        icon={<AudioLines className="w-7 h-7" />}
+        sections={[
+          {
+            icon: <Music className="w-5 h-5" />,
+            title: t.tutorialNameItem1Title,
+            description: t.tutorialNameItem1Desc,
+          },
+          {
+            icon: <Sparkles className="w-5 h-5" />,
+            title: t.tutorialNameItem3Title,
+            description: t.tutorialNameItem3Desc,
+          },
+        ]}
+      />
     </div>
   );
 };

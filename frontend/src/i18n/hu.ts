@@ -78,6 +78,8 @@ const hu = {
   lobbyStartGame: "Játék Indítása",
   lobbyOnlyHostStart: "Csak a host végezhet módosítást és indíthatja el a játékot.",
   lobbyLeave: "Kilépés a szobából",
+  lobbyLeaveTitle: "Szoba elhagyása",
+  lobbyLeaveWarning: "Biztosan ki szeretnél lépni a szobából?",
 
   // GameResult.tsx
   resultWeeklyDone: "Kihívás teljesítve!",
@@ -159,7 +161,7 @@ const hu = {
   // LeaveGameButton
   leaveTitle: "Elhagyod a játékot?",
   leaveWarning: "A jelenlegi játékállásod elveszíted!",
-  leaveConfirm: "Elhagyom",
+  leaveConfirm: "Igen, kilépek",
   leaveCancel: "Mégsem",
   leaveButtonLabel: "Kilépés",
 
@@ -198,6 +200,56 @@ const hu = {
   gameOverSolo: "JÁTÉK VÉGE! Eredmény betöltése...",
   gameOverMulti: "JÁTÉK VÉGE! Eredmények betöltése...",
   lastRound: "UTOLSÓ FORDULÓ!",
+
+  // Tutorials / Info Modals
+  tutorialDontShowAgain: "Többet ne jelenjen meg",
+  tutorialGotIt: "Megértettem",
+  tutorialInfoTooltip: "Ismertető",
+
+  // NameStep Tutorial
+  tutorialNameTitle: "Üdvözöl a ChronoTune!",
+  tutorialNameSubtitle: "Rövid ismertető.",
+  tutorialNameItem1Title: "Mi ez a játék?",
+  tutorialNameItem1Desc: "A ChronoTune egy idővonal-építő játék, ahol a dalokat a megjelenési évük szerint kell elhelyezned az idővonalon. Ehhez mindössze egy 30 másodperces részletet hallgathatsz meg az adott dalból.",
+  tutorialNameItem2Title: "Hogyan kell játszani?",
+  tutorialNameItem2Desc: "Hallgasd meg a zenét, húzz egy kártyát és illeszd a már meglévő idővonalra a megfelelő helyre! Ha eltalálod a sorrendet, a kártya az idővonal része marad.",
+  tutorialNameItem3Title: "Változatos játékmódok",
+  tutorialNameItem3Desc: "Játssz egyedül a saját tempódban, teszteld tudásodat a barátaiddal többjátékos módban, vagy versenyezz a heti ranglistán!",
+
+  // Solo Tutorial
+  tutorialSoloTitle: "Egyjátékos Mód",
+  tutorialSoloSubtitle: "Próbáld megdönteni a saját rekordodat!",
+  tutorialSoloItem1Title: "Játékhossz",
+  tutorialSoloItem1Desc: "Válaszd ki, hány kört szeretnél játszani (5–20). Minden körben egy új dalt kapsz, amelyet el kell helyezned az idővonalon. Helyes válasz esetén pontot kapsz, és a dal az idővonalra kerül. Hibás válasz esetén pontot veszítesz, a dal pedig eldobásra kerül",
+  tutorialSoloItem2Title: "Pontrendszer & Streak",
+  tutorialSoloItem2Desc: "Minden helyes lerakás +100 pontot ér. Ha egymás után legalább 3 dalt helyesen helyezel el, aktiválódik a streak: a 3. sikeres válaszért +50, majd minden további helyes lerakásért +20 bónuszpont jár. Vigyázz, mert egy hibás tipp -15 ponttal jár, és lenullázza a streakedet! Ha egyetlen hibát sem vétesz, a játék végén +500 bónuszt kapsz.",
+  tutorialSoloItem3Title: "Hibatűrés",
+  tutorialSoloItem3Desc: "Állítsd be a kívánt nehézséget. A 'Hardcore' módban egyetlen hiba azonnali vereséget jelent, míg a 'Relaxed' módban nincs hibahatár.",
+  tutorialSoloItem4Title: "Dalforrás",
+  tutorialSoloItem4Desc: "Válassz magyar vagy nemzetközi dalok közül. Magyar módban csak magyar nyelvű számokat, nemzetközi módban pedig a világ minden tájáról származó dalokat kaphatsz.",
+
+  // Multiplayer Tutorial
+  tutorialMultiTitle: "Többjátékos Mód",
+  tutorialMultiSubtitle: "Mérd össze zenei tudásod a barátaiddal valós időben!",
+  tutorialMultiItem1Title: "Szoba létrehozása & Csatlakozás",
+  tutorialMultiItem1Desc: "Hozz létre egy szobát és oszd meg a 4 jegyű szobakódot a barátaiddal, vagy csatlakozz egy meglévő szobához.",
+  tutorialMultiItem2Title: "Körökre osztott játék",
+  tutorialMultiItem2Desc: "A játékosok felváltva húznak kártyát és próbálják lerakni a saját idővonalukra. Aki a legtöbb pontot szerzi a játék során, az nyer!",
+  tutorialMultiItem3Title: "Pontrendszer & Streak",
+  tutorialMultiItem3Desc: "Minden helyes lerakás +100 pontot ér. Ha egymás után legalább 3 dalt helyesen helyezel el, aktiválódik a streak: a 3. sikeres válaszért +50, majd minden további helyes lerakásért +20 bónuszpont jár. Vigyázz, mert egy hibás tipp -15 ponttal jár, és lenullázza a streakedet! Ha egyetlen hibát sem vétesz, a játék végén +500 bónuszt kapsz.",
+  tutorialMultiItem4Title: "Játék elhagyása",
+  tutorialMultiItem4Desc: "Ha egy játékos elhagyja a játékot, a többiek zavartalanul folytathatják azt. A kilépett játékos olyan, mintha sosem csatlakozott volna.",
+
+  // Weekly Tutorial
+  tutorialWeeklyTitle: "Heti Kihívás",
+  tutorialWeeklySubtitle: "Egyenlő feltételek, heti 20 dal, globális dicsőségtábla!",
+  tutorialWeeklyItem1Title: "Azonos lista mindenkinek",
+  tutorialWeeklyItem1Desc: "Minden hétfőn 12:00-kor új, 20 dalból álló lista indul. A hét során minden játékos ugyanazokkal a dalokkal, ugyanabban a sorrendben játszik. Az új lista megjelenésekor az előző hét összes adata törlésre kerül!",
+  tutorialWeeklyItem2Title: "Játékállás mentése",
+  tutorialWeeklyItem2Desc: "A játékállásod automatikusan mentésre kerül, így megszakítás esetén ott folytathatod, ahol abbahagytad.",
+  tutorialWeeklyItem3Title: "Heti 1 próbálkozási lehetőség",
+  tutorialWeeklyItem3Desc: "A tisztességes verseny érdekében hetente csak egyszer vehetsz részt a kihívásban. Hozd ki magadból a maximumot!",
 };
+
 
 export default hu;
