@@ -1,4 +1,5 @@
 import { useLanguage } from "../../../context/LanguageContext";
+import { useLockBodyScroll } from "../../../hooks/useLockBodyScroll";
 
 interface DiscardConfirmModalProps {
   isOpen: boolean;
@@ -7,6 +8,7 @@ interface DiscardConfirmModalProps {
 }
 
 export const DiscardConfirmModal = ({ isOpen, onClose, onConfirm }: DiscardConfirmModalProps) => {
+  useLockBodyScroll(isOpen);
   const { t } = useLanguage();
   if (!isOpen) return null;
 

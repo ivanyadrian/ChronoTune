@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext";
+import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
 interface LeaveGameButtonProps {
   onConfirm: () => void;
@@ -17,6 +18,7 @@ const LeaveGameButton: React.FC<LeaveGameButtonProps> = ({
 }) => {
   const { t } = useLanguage();
   const [showConfirm, setShowConfirm] = useState(false);
+  useLockBodyScroll(showConfirm);
 
   return (
     <>

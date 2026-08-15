@@ -1,4 +1,5 @@
 import { useLanguage } from "../context/LanguageContext";
+import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 
 interface GameMessageProps {
   message: {
@@ -14,6 +15,7 @@ interface GameMessageProps {
 }
 
 export const GameMessage = ({ message, nextPlayerName, isWeekly }: GameMessageProps) => {
+  useLockBodyScroll(!!message);
   const { t } = useLanguage();
   if (!message) return null;
 

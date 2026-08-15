@@ -159,10 +159,12 @@ const en = {
   weeklyResetTime: "Reset: Every Monday at 12:00",
 
   // LeaveGameButton
-  leaveTitle: "Leave the game?",
-  leaveWarning: "You will lose your current game progress!",
-  leaveConfirm: "Leave",
+  leaveTitle: "Leaving the game?",
+  leaveWarning: "Your current game progress will be lost!",
+  leaveConfirm: "Yes, leave",
   leaveCancel: "Cancel",
+  weeklyLeaveTitle: "Leave Weekly Challenge",
+  weeklyLeaveWarning: "If you leave now, your current game progress will be saved, so you can continue from here next time.",
   leaveButtonLabel: "Leave",
 
   // BackButton

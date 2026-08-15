@@ -22,6 +22,7 @@ import {
   isTutorialHidden,
   setTutorialHidden,
 } from "../../utils/storageUtils";
+import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
 interface LeaderboardEntry {
   username: string;
@@ -65,6 +66,8 @@ export const WeeklyChallengeView = ({
 
   // Info modal state
   const [showInfo, setShowInfo] = useState(false);
+
+  useLockBodyScroll(showNotice && activeRunInfo !== null);
 
   useEffect(() => {
     if (!isTutorialHidden(STORAGE_KEYS.TUTORIAL_WEEKLY)) {

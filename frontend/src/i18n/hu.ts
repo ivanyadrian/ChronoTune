@@ -163,6 +163,8 @@ const hu = {
   leaveWarning: "A jelenlegi játékállásod elveszíted!",
   leaveConfirm: "Igen, kilépek",
   leaveCancel: "Mégsem",
+  weeklyLeaveTitle: "Kilépés a Heti Kihívásból",
+  weeklyLeaveWarning: "Ha most kilépsz, az aktuális játékállás elmentésre kerül, így legközelebb ugyaninnen tudod folytatni.",
   leaveButtonLabel: "Kilépés",
 
   // BackButton

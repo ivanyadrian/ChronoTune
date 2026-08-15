@@ -105,7 +105,11 @@ const WeeklyChallengeStats: React.FC<WeeklyChallengeStatsProps> = ({
 
         {/* 3. RIGHT SIDE: Leave button */}
         <div className="flex justify-end">
-          <LeaveGameButton onConfirm={onLeaveGame} />
+          <LeaveGameButton 
+            onConfirm={onLeaveGame} 
+            title={t.weeklyLeaveTitle}
+            warning={t.weeklyLeaveWarning}
+          />
         </div>
 
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Check, HelpCircle } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext";
 import { isTutorialHidden } from "../../utils/storageUtils";
+import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
 export interface InfoModalSection {
   icon?: React.ReactNode;
@@ -36,6 +37,8 @@ export const InfoModal: React.FC<InfoModalProps> = ({
       setDontShowAgain(isTutorialHidden(storageKey));
     }
   }, [isOpen, storageKey]);
+
+  useLockBodyScroll(isOpen);
 
 
   useEffect(() => {
