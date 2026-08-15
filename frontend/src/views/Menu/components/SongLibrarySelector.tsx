@@ -27,11 +27,17 @@ export const SongLibrarySelector = ({ value, onChange, disabled = false }: SongL
       </div>
 
       {/* Pill switcher */}
-      <div className="relative flex bg-[#241631] border border-white/8 rounded-2xl p-1.5 gap-1">
-        {/* Sliding highlight */}
+      <div className="relative grid grid-cols-1 xs:grid-cols-2 bg-[#241631] border border-white/8 rounded-2xl p-1.5 gap-1">
+        {/* Vertical Slider (below xs) */}
         <div
-          className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-[10px] bg-primary/15 border border-primary/40 shadow-[0_0_14px] shadow-primary/20 transition-all duration-300 ease-in-out"
-          style={{ left: value === 'hu' ? '6px' : 'calc(50% + 3px)' }}
+          className="xs:hidden absolute left-1.5 right-1.5 h-[calc(50%-8px)] rounded-[10px] bg-primary/15 border border-primary/40 shadow-[0_0_14px] shadow-primary/20 transition-all duration-300 ease-in-out"
+          style={{ top: value === 'hu' ? '6px' : 'calc(50% + 2px)' }}
+        />
+
+        {/* Horizontal Slider (xs and up) */}
+        <div
+          className="hidden xs:block absolute top-1.5 bottom-1.5 w-[calc(50%-8px)] rounded-[10px] bg-primary/15 border border-primary/40 shadow-[0_0_14px] shadow-primary/20 transition-all duration-300 ease-in-out"
+          style={{ left: value === 'hu' ? '6px' : 'calc(50% + 2px)' }}
         />
 
         {options.map((opt) => {
@@ -42,12 +48,12 @@ export const SongLibrarySelector = ({ value, onChange, disabled = false }: SongL
               type="button"
               onClick={() => onChange(opt.key)}
               className={`
-                relative flex-1 flex items-center justify-center gap-2.5 py-3 px-4 rounded-[10px]
-                transition-all duration-300 z-10
+                relative flex items-center justify-center py-2.5 sm:py-3 px-2 sm:px-4 rounded-[10px]
+                transition-all duration-300 z-10 overflow-hidden
                 ${isActive ? 'text-primary' : 'text-slate-400 hover:text-white/70'}
               `}
             >
-              <span className={`font-archivo text-sm uppercase tracking-widest font-bold transition-colors duration-300`}>
+              <span className={`font-archivo text-xs xs:text-[10px] sm:text-xs md:text-sm uppercase tracking-wider sm:tracking-widest font-bold transition-colors duration-300 truncate`}>
                 {opt.label}
               </span>
             </button>
