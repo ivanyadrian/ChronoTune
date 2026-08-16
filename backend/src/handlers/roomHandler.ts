@@ -84,7 +84,7 @@ const validateCreateRoomPayload = (
   if (
     !data?.userName ||
     data.userName.trim().length === 0 ||
-    data.userName.length > 20
+    data.userName.length > 15
   ) {
     socket.emit("error", "Érvénytelen felhasználónév!");
     return false;
@@ -436,7 +436,7 @@ export const registerRoomHandlers = (
     if (
       !data?.userName ||
       data.userName.trim().length === 0 ||
-      data.userName.length > 20
+      data.userName.length > 15
     ) {
       socket.emit("error", "Érvénytelen felhasználónév!");
       return;

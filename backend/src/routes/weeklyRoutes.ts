@@ -154,7 +154,7 @@ router.post("/submit", async (req, res) => {
     }
 
     const entry = new Leaderboard({
-      username: username.trim().substring(0, 20),
+      username: username.trim().substring(0, 15),
       fingerprint: fingerprint || "",
       mistakes,
       correctPlacements: typeof correctPlacements === "number" ? correctPlacements : Math.max(0, 20 - mistakes),

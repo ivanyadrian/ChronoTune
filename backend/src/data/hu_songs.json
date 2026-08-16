@@ -15324,18 +15324,6 @@
     "day": 9
   },
   {
-    "id": 1277,
-    "artist": "Hobo Blues Band",
-    "title": "Rolling Stones blues",
-    "deezerId": "2788996922",
-    "preview": "https://cdnt-preview.dzcdn.net/api/1/1/1/c/5/0/1c57aa6587deccf44005115c8226f893.mp3?hdnea=exp=1786116211~acl=/api/1/1/1/c/5/0/1c57aa6587deccf44005115c8226f893.mp3*~data=user_id=0,application_id=42~hmac=6429da6b3846625bc0b2f1c53e644dfd43ed661d106946ba47d34d85d87759e6",
-    "cover": "https://cdn-images.dzcdn.net/images/cover/b697bcccbdc89456c35b2adb2ca25b57/500x500-000000-80-0-0.jpg",
-    "fullDate": "1993-05-24",
-    "year": 1993,
-    "month": 5,
-    "day": 24
-  },
-  {
     "id": 1278,
     "artist": "Hobo Blues Band",
     "title": "Szelep Szerep",
@@ -15353,18 +15341,6 @@
     "title": "Vakon És Süketen",
     "deezerId": "3489175",
     "preview": "https://cdnt-preview.dzcdn.net/api/1/1/8/a/7/0/8a7bd92a437017f10535020f52607e3d.mp3?hdnea=exp=1786116211~acl=/api/1/1/8/a/7/0/8a7bd92a437017f10535020f52607e3d.mp3*~data=user_id=0,application_id=42~hmac=62c7414b6729288e2237e4db5307a0fbcfb591d21134805ca908863e61b76d4b",
-    "cover": "https://cdn-images.dzcdn.net/images/cover/e3d7530d01ea2e1e16f24cac25fa5ae6/500x500-000000-80-0-0.jpg",
-    "fullDate": "2008-10-27",
-    "year": 2008,
-    "month": 10,
-    "day": 27
-  },
-  {
-    "id": 1280,
-    "artist": "Hobo Blues Band",
-    "title": "Triptichon",
-    "deezerId": "3489180",
-    "preview": "https://cdnt-preview.dzcdn.net/api/1/1/c/8/5/0/c8523b8abdfd47a693de5501b08dab06.mp3?hdnea=exp=1786116211~acl=/api/1/1/c/8/5/0/c8523b8abdfd47a693de5501b08dab06.mp3*~data=user_id=0,application_id=42~hmac=2d1a75e641a700a16e0a0bf3e34aa4783cd2e600e02249147ebfb811702a70c2",
     "cover": "https://cdn-images.dzcdn.net/images/cover/e3d7530d01ea2e1e16f24cac25fa5ae6/500x500-000000-80-0-0.jpg",
     "fullDate": "2008-10-27",
     "year": 2008,

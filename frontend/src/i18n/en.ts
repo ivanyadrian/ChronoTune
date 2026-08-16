@@ -251,6 +251,11 @@ const en = {
   tutorialWeeklyItem2Desc: "Your game progress is saved automatically, so if interrupted, you can resume right where you left off.",
   tutorialWeeklyItem3Title: "1 Attempt Per Week",
   tutorialWeeklyItem3Desc: "To ensure fair competition, each player can participate in the challenge only once per week. Give it your absolute best!",
+
+  // Leaderboard
+  leaderboardNow: "Now",
+  leaderboardNext: "Next",
+  leaderboardMe: "(YOU)",
 };
 
 

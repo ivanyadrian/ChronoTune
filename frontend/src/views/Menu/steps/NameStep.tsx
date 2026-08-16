@@ -69,7 +69,7 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               placeholder={t.namePlaceholder}
-              maxLength={20}
+              maxLength={15}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && userName.trim()) {
                   onNext();

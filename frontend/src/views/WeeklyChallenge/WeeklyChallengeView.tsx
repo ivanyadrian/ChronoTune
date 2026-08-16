@@ -328,7 +328,8 @@ export const WeeklyChallengeView = ({
                 type="text"
                 placeholder={t.weeklyNamePlaceholder}
                 value={userName}
-                onChange={(e) => setUserName(e.target.value.slice(0, 20))}
+                maxLength={15}
+                onChange={(e) => setUserName(e.target.value.slice(0, 15))}
                 className="w-full bg-bg-dark font-archivo border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-secondary-light transition text-center font-bold placeholder:text-white/20"
               />
             </div>
@@ -362,10 +363,10 @@ export const WeeklyChallengeView = ({
 
         <div className="md:col-span-2 rounded-3xl border border-white/5 bg-surface-dark p-6 backdrop-blur-md flex flex-col gap-6 overflow-hidden">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg xs:text-xl font-bold font-archivo text-white flex items-center gap-2">
+            <h2 className="text-md xs:text-xl font-bold font-archivo text-white flex items-center gap-2">
               {t.weeklyLeaderboardTitle}
             </h2>
-            <span className="text-[10px] xs:text-xs text-zinc-500 font-archivo">{t.weeklyLeaderboardTop}</span>
+            <span className="text-[8px] xs:text-xs text-zinc-500 font-archivo">{t.weeklyLeaderboardTop}</span>
           </div>
 
           {loading ? (
@@ -439,7 +440,7 @@ export const WeeklyChallengeView = ({
 
                         <td className="py-3.5 px-4 text-center font-archivo">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${getScoreColor(entry.correctPlacements)}`}
+                            className={`whitespace-nowrap px-2.5 py-0.5 rounded-full text-xs font-bold ${getScoreColor(entry.correctPlacements)}`}
                           >
                             {entry.correctPlacements} <span className="text-slate-300">/ 20</span>
                           </span>

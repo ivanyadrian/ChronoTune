@@ -103,9 +103,11 @@ export const MusicPlayer = ({
   useEffect(() => {
     if (audioRef.current) {
       const actualVolume = isMuted ? 0 : volume;
-      audioRef.current.volume = actualVolume / 100;
+      // Scale down the volume to 15% on desktop, but keep it at 100% on mobile
+      const multiplier = isMobile ? 1 : 0.15;
+      audioRef.current.volume = (actualVolume / 100) * multiplier;
     }
-  }, [volume, isMuted]);
+  }, [volume, isMuted, isMobile]);
 
   useEffect(() => {
     const audio = audioRef.current;

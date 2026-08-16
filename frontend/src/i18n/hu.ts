@@ -251,6 +251,11 @@ const hu = {
   tutorialWeeklyItem2Desc: "A játékállásod automatikusan mentésre kerül, így megszakítás esetén ott folytathatod, ahol abbahagytad.",
   tutorialWeeklyItem3Title: "Heti 1 próbálkozási lehetőség",
   tutorialWeeklyItem3Desc: "A tisztességes verseny érdekében hetente csak egyszer vehetsz részt a kihívásban. Hozd ki magadból a maximumot!",
+
+  // Leaderboard
+  leaderboardNow: "Most",
+  leaderboardNext: "Köv.",
+  leaderboardMe: "(TE)",
 };
 
 

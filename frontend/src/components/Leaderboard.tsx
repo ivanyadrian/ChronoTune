@@ -1,5 +1,6 @@
 import { Zap } from "lucide-react";
 import { socket } from "../socket";
+import { useLanguage } from "../context/LanguageContext";
 import type { Player } from "../types";
 import { getPlayerRank } from "../utils/rankUtils";
 
@@ -16,6 +17,7 @@ export const Leaderboard = ({
   isSolo,
   currentTurnId,
 }: LeaderboardProps) => {
+  const { t } = useLanguage();
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
   const currentTurnIndex = players.findIndex((p) => p.id === currentTurnId);
@@ -49,12 +51,11 @@ export const Leaderboard = ({
               
               ${shouldShowOnMobileOrTablet ? "grid" : "hidden lg:grid"}
               
-              ${
-                isCurrent
-                  ? "order-1 lg:order-0"
-                  : isNext
-                    ? "order-2 lg:order-0"
-                    : "order-3 lg:order-0"
+              ${isCurrent
+                ? "order-1 lg:order-0"
+                : isNext
+                  ? "order-2 lg:order-0"
+                  : "order-3 lg:order-0"
               }
 
               md:flex-1 lg:flex-none lg:w-full
@@ -62,10 +63,9 @@ export const Leaderboard = ({
               transition-all duration-300 ease-out
               rounded-2xl overflow-hidden
 
-              ${
-                isCurrent
-                  ? "scale-100 lg:scale-102 z-10 opacity-100 lg:ring-2 lg:ring-secondary/50"
-                  : "lg:scale-98 opacity-60 lg:opacity-75"
+              ${isCurrent
+                ? "scale-100 lg:scale-102 z-10 opacity-100 lg:ring-2 lg:ring-secondary/50"
+                : "lg:scale-98 opacity-60 lg:opacity-75"
               }
             `}
           >
@@ -74,10 +74,9 @@ export const Leaderboard = ({
               className={`
                 absolute inset-0 rounded-2xl pointer-events-none
                 backdrop-blur-xl border transition-all duration-300 ease-out
-                ${
-                  isCurrent
-                    ? "bg-secondary/15 border-secondary-light/40 shadow-[0_0_30px] shadow-secondary-light/25"
-                    : "bg-white/5 border-white/8"
+                ${isCurrent
+                  ? "bg-secondary/15 border-secondary-light/40 shadow-[0_0_30px] shadow-secondary-light/25"
+                  : "bg-white/5 border-white/8"
                 }
               `}
             />
@@ -88,16 +87,15 @@ export const Leaderboard = ({
                 <div
                   className={`
                     w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center font-archivo text-sm lg:text-base rounded-l-2xl transition-colors duration-300
-                    ${
-                      player.score > 0
-                        ? rank === 1
-                          ? "bg-yellow-400 text-black"
-                          : rank === 2
-                            ? "bg-slate-300 text-black"
-                            : rank === 3
-                              ? "bg-amber-700 text-white"
-                              : "bg-white/20 text-white"
-                        : "bg-white/10 text-white/50"
+                    ${player.score > 0
+                      ? rank === 1
+                        ? "bg-yellow-400 text-black"
+                        : rank === 2
+                          ? "bg-slate-300 text-black"
+                          : rank === 3
+                            ? "bg-amber-700 text-white"
+                            : "bg-white/20 text-white"
+                      : "bg-white/10 text-white/50"
                     }
                   `}
                 >
@@ -114,27 +112,26 @@ export const Leaderboard = ({
 
                   {isMe && (
                     <span className="text-purple-300 text-[10px] lg:text-xs font-bold shrink-0">
-                      (TE)
+                      {t.leaderboardMe}
                     </span>
                   )}
 
                   {isCurrent && (
                     <span className="lg:hidden text-[8px] bg-secondary/80 text-purple-100 px-1 py-0.5 rounded font-archivo tracking-wide shrink-0 uppercase">
-                      Most
+                      {t.leaderboardNow}
                     </span>
                   )}
                   {!isCurrent && isNext && (
                     <span className="lg:hidden text-[8px] bg-blue-500/40 text-blue-200 border border-blue-500/30 px-1 py-0.5 rounded font-archivo tracking-wide shrink-0 uppercase">
-                      Köv.
+                      {t.leaderboardNext}
                     </span>
                   )}
                 </p>
 
                 {(isWinStreak || isLoseStreak) && (
                   <div
-                    className={`absolute right-3 top-0 lg:right-2 lg:top-0.5 flex items-center justify-center gap-0.5 shrink-0 ${
-                      isWinStreak ? "text-purple-300" : "text-red-400"
-                    }`}
+                    className={`absolute right-3 top-0 lg:right-2 lg:top-0.5 flex items-center justify-center gap-0.5 shrink-0 ${isWinStreak ? "text-purple-300" : "text-red-400"
+                      }`}
                   >
                     <Zap className="w-2 h-2" fill="currentColor" />
                     <span className="text-[9px] font-bold">
@@ -148,11 +145,10 @@ export const Leaderboard = ({
                 {delta !== 0 ? (
                   /* IF THERE IS A DELTA: SHOW THE UPDATED SCORE */
                   <div
-                    className={`text-xl lg:text-2xl font-archivo tabular-nums transition-all duration-300 animate-in fade-in slide-in-from-top-1 ${
-                      delta > 0
+                    className={`text-xl lg:text-2xl font-archivo tabular-nums transition-all duration-300 animate-in fade-in slide-in-from-top-1 ${delta > 0
                         ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]"
                         : "text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                    }`}
+                      }`}
                   >
                     {delta > 0 ? `+${delta}` : delta}
                   </div>
@@ -161,12 +157,11 @@ export const Leaderboard = ({
                   <div
                     className={`
                       text-xl lg:text-2xl font-archivo tabular-nums transition-all duration-300
-                      ${
-                        isWinStreak
-                          ? "text-secondary-light drop-shadow-[0_0_8px] shadow-secondary-light/50"
-                          : isLoseStreak
-                            ? "text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                            : "text-white"
+                      ${isWinStreak
+                        ? "text-secondary-light drop-shadow-[0_0_8px] shadow-secondary-light/50"
+                        : isLoseStreak
+                          ? "text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+                          : "text-white"
                       }
                     `}
                   >
