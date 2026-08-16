@@ -366,7 +366,9 @@ export const WeeklyChallengeView = ({
             <h2 className="text-md xs:text-xl font-bold font-archivo text-white flex items-center gap-2">
               {t.weeklyLeaderboardTitle}
             </h2>
-            <span className="text-[8px] xs:text-xs text-zinc-500 font-archivo">{t.weeklyLeaderboardTop}</span>
+            <span className="text-[8px] xs:text-xs text-zinc-500 font-archivo text-right leading-tight">
+              {t.weeklyLeaderboardTop}
+            </span>
           </div>
 
           {loading ? (
