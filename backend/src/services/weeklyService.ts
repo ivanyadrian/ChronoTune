@@ -6,6 +6,14 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import crypto from "crypto";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const TIMEZONE = "Europe/Budapest";
 
 export const ACTIVE_RUN_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -199,21 +207,22 @@ const __dirname = path.dirname(__filename);
 
 // Helper function to get the current challenge period start (most recent Wednesday 12:00)
 export function getChallengePeriodStart(now: Date = new Date()): Date {
-  const d = new Date(now);
-  d.setHours(12, 0, 0, 0);
+  let d = dayjs(now).tz(TIMEZONE);
 
-  const day = d.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+  d = d.hour(12).minute(0).second(0).millisecond(0);
+
+  const day = d.day(); // 0: Sunday, 1: Monday, ..., 6: Saturday
   const diffToWednesday = (day + 4) % 7;
 
-  d.setDate(d.getDate() - diffToWednesday);
+  d = d.subtract(diffToWednesday, 'day');
 
   // If the calculated Wednesday 12:00 is in the future relative to 'now',
   // it means we are in Wednesday morning, so the period started last Wednesday at 12:00
-  if (d.getTime() > now.getTime()) {
-    d.setDate(d.getDate() - 7);
+  if (d.valueOf() > now.getTime()) {
+    d = d.subtract(7, 'day');
   }
 
-  return d;
+  return d.toDate();
 }
 
 // Format the period start date to a unique string like "2026-07-13-12-00"
@@ -304,6 +313,8 @@ export function initWeeklyScheduler(): void {
   cron.schedule("0 12 * * 3", async () => {
     console.log("[WeeklyScheduler] Heti reset ütemezett futása (Szerda 12:00)");
     await checkAndResetWeeklyChallenge();
+  }, {
+    timezone: TIMEZONE
   });
   console.log("[WeeklyScheduler] Heti kihívás ütemező inicializálva.");
 }
