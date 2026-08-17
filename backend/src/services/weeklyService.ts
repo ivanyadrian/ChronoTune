@@ -197,18 +197,18 @@ export async function removeWeeklyRun(runId: string): Promise<void> {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Helper function to get the current challenge period start (most recent Monday 12:00)
+// Helper function to get the current challenge period start (most recent Wednesday 12:00)
 export function getChallengePeriodStart(now: Date = new Date()): Date {
   const d = new Date(now);
   d.setHours(12, 0, 0, 0);
 
   const day = d.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
-  const diffToMonday = day === 0 ? 6 : day - 1;
+  const diffToWednesday = (day + 4) % 7;
 
-  d.setDate(d.getDate() - diffToMonday);
+  d.setDate(d.getDate() - diffToWednesday);
 
-  // If the calculated Monday 12:00 is in the future relative to 'now',
-  // it means we are in Monday morning, so the period started last Monday at 12:00
+  // If the calculated Wednesday 12:00 is in the future relative to 'now',
+  // it means we are in Wednesday morning, so the period started last Wednesday at 12:00
   if (d.getTime() > now.getTime()) {
     d.setDate(d.getDate() - 7);
   }
@@ -299,10 +299,10 @@ export async function checkAndResetWeeklyChallenge(): Promise<void> {
 
 // Setup the Scheduler
 export function initWeeklyScheduler(): void {
-  // node-cron syntax for every Monday at 12:00:
-  // Minute(0) Hour(12) DayOfMonth(*) Month(*) DayOfWeek(1)
-  cron.schedule("0 12 * * 1", async () => {
-    console.log("[WeeklyScheduler] Heti reset ütemezett futása (Hétfő 12:00)");
+  // node-cron syntax for every Wednesday at 12:00:
+  // Minute(0) Hour(12) DayOfMonth(*) Month(*) DayOfWeek(3)
+  cron.schedule("0 12 * * 3", async () => {
+    console.log("[WeeklyScheduler] Heti reset ütemezett futása (Szerda 12:00)");
     await checkAndResetWeeklyChallenge();
   });
   console.log("[WeeklyScheduler] Heti kihívás ütemező inicializálva.");
