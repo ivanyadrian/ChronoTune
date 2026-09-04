@@ -1,73 +1,42 @@
-# React + TypeScript + Vite
+# ChronoTune - Frontend Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend client for **ChronoTune**, built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS v4**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Overview & Architecture
 
-## React Compiler
+- **Framework:** React 19 with functional components and modern hooks.
+- **Styling:** Tailwind CSS v4 with custom responsive animations (visualizers, vinyl rotation, card flips).
+- **Real-time Engine:** Socket.io client with decoupled custom hooks:
+  - `useRoomSocket`: Room creation, joining, and lobby synchronization.
+  - `useGameplaySocket`: Turn-based card placements, verification results, and state updates.
+  - `useAudioSyncSocket`: Music playback state and timestamp synchronization across clients.
+- **Localization (i18n):** Context-driven instant translation between English (`en`) and Hungarian (`hu`).
+- **Player Identification:** Browser fingerprinting (`@fingerprintjs/fingerprintjs`) for seamless, frictionless weekly challenge participation without mandatory registration.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Component & View Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- `src/views/GameBoard`: Main game screen with interactive timeline, hand deck, and status metrics.
+- `src/views/Lobby`: Pre-game multiplayer waiting room with settings configuration and room link sharing.
+- `src/views/Menu`: Mode selection (Solo, Multiplayer, Weekly Challenge) and rule customization steps.
+- `src/views/WeeklyChallenge`: Dedicated weekly challenge view with rules, active run tracker, and global leaderboard.
+- `src/views/GameResult`: Game conclusion screen displaying player placements and accuracy statistics.
+- `src/components/`: Reusable UI modules (e.g. `MusicPlayer`, `TimeLine`, `SongCard`, `Leaderboard`, `Toast`).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Development
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+```bash
+# Install dependencies
+npm install
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+# Run development server
+npm run dev
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Type-check and production build
+npm run build
 ```

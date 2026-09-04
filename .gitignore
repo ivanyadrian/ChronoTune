@@ -34,8 +34,13 @@ build/
 .vite/
 .tsbuildinfo
 
-# Utility scripts
-scripts/
+# Script temporary data, exports & checkpoints
+scripts/*_checkpoint.json
+scripts/*_report.json
+scripts/spotify_export.json
+**/data/*_checkpoint.json
+**/data/*_report.json
+**/data/*_cleaned.json
 
 # Editor & OS files
 .vscode/*

@@ -3,9 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import {
-  registerRoomHandlers,
-} from "./handlers/roomHandler.js";
+import { registerRoomHandlers } from "./handlers/roomHandler.js";
 import { registerGameHandlers } from "./handlers/gameHandler.js";
 import { Room } from "./types.js";
 import { connectDB } from "./db.js";
@@ -26,7 +24,7 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || true;
 connectDB().then(async () => {
   // Ensure the weekly challenge is generated/synced at startup
   await checkAndResetWeeklyChallenge();
-  // Start the weekly scheduler (Monday 12:00 reset)
+  // Start the weekly scheduler (Wednesday 12:00 reset)
   initWeeklyScheduler();
 });
 

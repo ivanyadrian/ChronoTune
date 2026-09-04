@@ -1,10 +1,8 @@
+import weeklyChallengeSongs from "../data/weekly_challenge_songs.json" with { type: "json" };
 import { WeeklyChallenge, Leaderboard, ActiveWeeklyRun } from "../db.js";
 import type { Song } from "../types.js";
 import { shuffle } from "../utils/shuffle.js";
 import cron from "node-cron";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import crypto from "crypto";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
@@ -19,7 +17,7 @@ export const ACTIVE_RUN_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes
 
 export function computeWeeklyElapsedMs(
   accumulatedMs: number,
-  sessionStartTime?: number
+  sessionStartTime?: number,
 ): number {
   if (!sessionStartTime) return accumulatedMs;
   return accumulatedMs + Math.max(0, Date.now() - sessionStartTime);
@@ -27,9 +25,11 @@ export function computeWeeklyElapsedMs(
 
 export function computeWeeklyTimeInSeconds(
   accumulatedMs: number,
-  sessionStartTime?: number
+  sessionStartTime?: number,
 ): number {
-  return Math.floor(computeWeeklyElapsedMs(accumulatedMs, sessionStartTime) / 1000);
+  return Math.floor(
+    computeWeeklyElapsedMs(accumulatedMs, sessionStartTime) / 1000,
+  );
 }
 
 export interface StartWeeklyRunResult {
@@ -44,31 +44,36 @@ export interface StartWeeklyRunResult {
 export async function startWeeklyRun(
   username: string,
   fingerprint: string,
-  clientRunId?: string | null
+  clientRunId?: string | null,
 ): Promise<StartWeeklyRunResult> {
   const trimmedName = username.trim();
   const currentWeekId = getWeekIdentifier();
   const escapedName = trimmedName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const caseInsensitiveRegex = new RegExp(`^${escapedName}$`, "i");
 
-  const devFingerprint = process.env.DEVELOPER_FINGERPRINT || "DEVELOPER_BYPASS_FINGERPRINT";
+  const devFingerprint =
+    process.env.DEVELOPER_FINGERPRINT || "DEVELOPER_BYPASS_FINGERPRINT";
   const isDeveloper = fingerprint && fingerprint === devFingerprint;
 
   // 1. Check: Has this NAME (always) or this FINGERPRINT (unless developer) already played this week?
   const leaderboardQuery = isDeveloper
-    ? { weekIdentifier: currentWeekId, username: { $regex: caseInsensitiveRegex } }
+    ? {
+        weekIdentifier: currentWeekId,
+        username: { $regex: caseInsensitiveRegex },
+      }
     : {
-      weekIdentifier: currentWeekId,
-      $or: [
-        { username: { $regex: caseInsensitiveRegex } },
-        { fingerprint: fingerprint }
-      ]
-    };
+        weekIdentifier: currentWeekId,
+        $or: [
+          { username: { $regex: caseInsensitiveRegex } },
+          { fingerprint: fingerprint },
+        ],
+      };
 
   const alreadyPlayed = await Leaderboard.findOne(leaderboardQuery);
 
   if (alreadyPlayed) {
-    const isSameName = alreadyPlayed.username.toLowerCase() === trimmedName.toLowerCase();
+    const isSameName =
+      alreadyPlayed.username.toLowerCase() === trimmedName.toLowerCase();
     return {
       success: false,
       error: isSameName
@@ -79,17 +84,19 @@ export async function startWeeklyRun(
 
   const now = new Date();
   const periodStart = getChallengePeriodStart(now);
-  const nextResetDate = new Date(periodStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const nextResetDate = new Date(
+    periodStart.getTime() + 7 * 24 * 60 * 60 * 1000,
+  );
 
   // 2. Check: Is there an active run for this name (always) or fingerprint (unless developer)
   const activeRunQuery = isDeveloper
     ? { username: { $regex: caseInsensitiveRegex } }
     : {
-      $or: [
-        { username: { $regex: caseInsensitiveRegex } },
-        { fingerprint: fingerprint }
-      ]
-    };
+        $or: [
+          { username: { $regex: caseInsensitiveRegex } },
+          { fingerprint: fingerprint },
+        ],
+      };
 
   const existingRun = await ActiveWeeklyRun.findOne(activeRunQuery);
 
@@ -97,7 +104,8 @@ export async function startWeeklyRun(
     // Resumption criteria:
     // - clientRunId matches existingRun.runId
     // - OR (if not developer) the fingerprint matches existingRun.fingerprint
-    const isOwner = (clientRunId && existingRun.runId === clientRunId) ||
+    const isOwner =
+      (clientRunId && existingRun.runId === clientRunId) ||
       (!isDeveloper && existingRun.fingerprint === fingerprint);
 
     if (isOwner) {
@@ -107,10 +115,16 @@ export async function startWeeklyRun(
       existingRun.sessionToken = sessionToken;
       existingRun.expiresAt = nextResetDate;
       await existingRun.save();
-      return { success: true, runId: existingRun.runId, sessionToken, existingRun };
+      return {
+        success: true,
+        runId: existingRun.runId,
+        sessionToken,
+        existingRun,
+      };
     }
 
-    const isSameName = existingRun.username.toLowerCase() === trimmedName.toLowerCase();
+    const isSameName =
+      existingRun.username.toLowerCase() === trimmedName.toLowerCase();
     return {
       success: false,
       error: isSameName
@@ -127,11 +141,11 @@ export async function startWeeklyRun(
   const deleteQuery = isDeveloper
     ? { username: { $regex: caseInsensitiveRegex } }
     : {
-      $or: [
-        { username: { $regex: caseInsensitiveRegex } },
-        { fingerprint: fingerprint }
-      ]
-    };
+        $or: [
+          { username: { $regex: caseInsensitiveRegex } },
+          { fingerprint: fingerprint },
+        ],
+      };
   await ActiveWeeklyRun.deleteMany(deleteQuery);
 
   const newRun = new ActiveWeeklyRun({
@@ -147,7 +161,6 @@ export async function startWeeklyRun(
   return { success: true, runId, sessionToken, existingRun: newRun };
 }
 
-
 // Update game state within the active run
 export async function updateWeeklyRunState(
   runId: string,
@@ -158,19 +171,24 @@ export async function updateWeeklyRunState(
     mistakes?: number;
     correctPlacements?: number;
     attempts?: number;
-  }
+  },
 ): Promise<void> {
   if (!runId) return;
   const now = new Date();
   const periodStart = getChallengePeriodStart(now);
-  const nextResetDate = new Date(periodStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const nextResetDate = new Date(
+    periodStart.getTime() + 7 * 24 * 60 * 60 * 1000,
+  );
   const updateFields: any = { expiresAt: nextResetDate };
 
   if (state.timeline !== undefined) updateFields.timeline = state.timeline;
-  if (state.personalDeck !== undefined) updateFields.personalDeck = state.personalDeck;
-  if (state.activeCard !== undefined) updateFields.activeCard = state.activeCard;
+  if (state.personalDeck !== undefined)
+    updateFields.personalDeck = state.personalDeck;
+  if (state.activeCard !== undefined)
+    updateFields.activeCard = state.activeCard;
   if (state.mistakes !== undefined) updateFields.mistakes = state.mistakes;
-  if (state.correctPlacements !== undefined) updateFields.correctPlacements = state.correctPlacements;
+  if (state.correctPlacements !== undefined)
+    updateFields.correctPlacements = state.correctPlacements;
   if (state.attempts !== undefined) updateFields.attempts = state.attempts;
 
   await ActiveWeeklyRun.updateOne({ runId }, { $set: updateFields });
@@ -180,17 +198,19 @@ export async function updateWeeklyRunState(
 export async function pauseWeeklyRun(
   runId: string,
   sessionStartTime: number,
-  accumulatedMs: number = 0
+  accumulatedMs: number = 0,
 ): Promise<void> {
   if (!runId) return;
   const now = new Date();
   const totalElapsed = computeWeeklyElapsedMs(accumulatedMs, sessionStartTime);
   const periodStart = getChallengePeriodStart(now);
-  const nextResetDate = new Date(periodStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const nextResetDate = new Date(
+    periodStart.getTime() + 7 * 24 * 60 * 60 * 1000,
+  );
 
   await ActiveWeeklyRun.updateOne(
     { runId },
-    { $set: { elapsedTimeMs: totalElapsed, expiresAt: nextResetDate } }
+    { $set: { elapsedTimeMs: totalElapsed, expiresAt: nextResetDate } },
   );
 }
 
@@ -199,11 +219,6 @@ export async function removeWeeklyRun(runId: string): Promise<void> {
   if (!runId) return;
   await ActiveWeeklyRun.deleteOne({ runId });
 }
-
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Helper function to get the current challenge period start (most recent Wednesday 12:00)
 export function getChallengePeriodStart(now: Date = new Date()): Date {
@@ -214,12 +229,12 @@ export function getChallengePeriodStart(now: Date = new Date()): Date {
   const day = d.day(); // 0: Sunday, 1: Monday, ..., 6: Saturday
   const diffToWednesday = (day + 4) % 7;
 
-  d = d.subtract(diffToWednesday, 'day');
+  d = d.subtract(diffToWednesday, "day");
 
   // If the calculated Wednesday 12:00 is in the future relative to 'now',
   // it means we are in Wednesday morning, so the period started last Wednesday at 12:00
   if (d.valueOf() > now.getTime()) {
-    d = d.subtract(7, 'day');
+    d = d.subtract(7, "day");
   }
 
   return d.toDate();
@@ -235,7 +250,10 @@ export function getWeekIdentifier(now: Date = new Date()): string {
 }
 
 // Generate a weekly challenge deck of 20 songs with unique years
-export function generateWeeklyChallengeDeck(songs: Song[], targetLength: number = 21): Song[] {
+export function generateWeeklyChallengeDeck(
+  songs: Song[],
+  targetLength: number = 21,
+): Song[] {
   const shuffled = shuffle([...songs]);
   const deck: Song[] = [];
   const usedYears = new Set<number>();
@@ -250,16 +268,9 @@ export function generateWeeklyChallengeDeck(songs: Song[], targetLength: number 
   return deck;
 }
 
-// Read weekly_challenge_songs.json
+// Return loaded weekly_challenge_songs
 function loadSongs(): Song[] {
-  const songsPath = path.join(__dirname, "../data/weekly_challenge_songs.json");
-  try {
-    const rawData = fs.readFileSync(songsPath, "utf-8");
-    return JSON.parse(rawData);
-  } catch (error) {
-    console.error("Hiba a weekly_challenge_songs.json beolvasása közben:", error);
-    return [];
-  }
+  return weeklyChallengeSongs as Song[];
 }
 
 // Perform check & reset if needed
@@ -274,13 +285,14 @@ export async function checkAndResetWeeklyChallenge(): Promise<void> {
     const existing = await WeeklyChallenge.findOne({ weekIdentifier: weekId });
 
     if (!existing) {
-      console.log(`[WeeklyChallenge] Új időszak kezdődik! Új heti kihívás generálása: ${weekId}`);
+      console.log(
+        `[WeeklyChallenge] Új időszak kezdődik! Új heti kihívás generálása: ${weekId}`,
+      );
 
       // Wipe old weekly challenges, leaderboards, and active weekly runs to keep DB clean
       await WeeklyChallenge.deleteMany({});
       await Leaderboard.deleteMany({});
       await ActiveWeeklyRun.deleteMany({});
-
 
       const songs = loadSongs();
       if (songs.length === 0) {
@@ -299,7 +311,9 @@ export async function checkAndResetWeeklyChallenge(): Promise<void> {
       await challenge.save();
       console.log("[WeeklyChallenge] Új heti kihívás sikeresen mentve!");
     } else {
-      console.log(`[WeeklyChallenge] A heti kihívás már létezik ehhez az időszakhoz: ${weekId}`);
+      console.log(
+        `[WeeklyChallenge] A heti kihívás már létezik ehhez az időszakhoz: ${weekId}`,
+      );
     }
   } catch (error) {
     console.error("Hiba a heti kihívás ellenőrzése/resetelése során:", error);
@@ -310,11 +324,17 @@ export async function checkAndResetWeeklyChallenge(): Promise<void> {
 export function initWeeklyScheduler(): void {
   // node-cron syntax for every Wednesday at 12:00:
   // Minute(0) Hour(12) DayOfMonth(*) Month(*) DayOfWeek(3)
-  cron.schedule("0 12 * * 3", async () => {
-    console.log("[WeeklyScheduler] Heti reset ütemezett futása (Szerda 12:00)");
-    await checkAndResetWeeklyChallenge();
-  }, {
-    timezone: TIMEZONE
-  });
+  cron.schedule(
+    "0 12 * * 3",
+    async () => {
+      console.log(
+        "[WeeklyScheduler] Heti reset ütemezett futása (Szerda 12:00)",
+      );
+      await checkAndResetWeeklyChallenge();
+    },
+    {
+      timezone: TIMEZONE,
+    },
+  );
   console.log("[WeeklyScheduler] Heti kihívás ütemező inicializálva.");
 }
