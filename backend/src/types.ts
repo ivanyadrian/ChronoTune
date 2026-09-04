@@ -8,6 +8,7 @@ export interface Song {
   day: number;
   fullDate: string;
   cover: string;
+  isStartCard?: boolean;
 }
 
 export interface Player {
@@ -33,7 +34,7 @@ export interface Room {
   turnLocked: boolean;
   maxMistakes: number | null;
   syncMusic: boolean;
-  songLibrary: 'hu' | 'en';
+  songLibrary: "hu" | "en";
   activeCard?: Song;
   playbackState: number;
   currentPlayingDeezerId: string | null;

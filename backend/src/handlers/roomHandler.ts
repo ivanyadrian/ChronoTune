@@ -18,7 +18,7 @@ interface CreateRoomData {
   isSolo?: boolean;
   maxMistakes?: number | null;
   syncMusic?: boolean;
-  songLibrary?: 'hu' | 'en';
+  songLibrary?: "hu" | "en";
   isWeekly?: boolean;
   runId?: string;
   fingerprint?: string;
@@ -116,7 +116,11 @@ const validateCreateRoomPayload = (
     return false;
   }
 
-  if (data.songLibrary !== undefined && data.songLibrary !== 'hu' && data.songLibrary !== 'en') {
+  if (
+    data.songLibrary !== undefined &&
+    data.songLibrary !== "hu" &&
+    data.songLibrary !== "en"
+  ) {
     socket.emit("error", "Érvénytelen dalkönyvtár!");
     return false;
   }
@@ -173,7 +177,7 @@ const handleWeeklyRoomCreation = async (
       turnLocked: false,
       maxMistakes: null,
       syncMusic: data.syncMusic ?? true,
-      songLibrary: 'hu',
+      songLibrary: "hu",
       activeCard: undefined,
       playbackState: PLAYBACK_STATE.STOPPED,
       currentPlayingDeezerId: null,
@@ -201,7 +205,13 @@ const handleWeeklyRoomCreation = async (
     } else {
       // Initialize new weekly deck
       const pDeck = [...challenge.songs];
-      const startCard = pDeck.pop();
+      const rawStartCard = pDeck.pop();
+      const startCard = rawStartCard
+        ? ({
+            ...(rawStartCard.toObject ? rawStartCard.toObject() : rawStartCard),
+            isStartCard: true,
+          } as Song)
+        : undefined;
       newRoom.players[0].personalDeck = pDeck;
       if (startCard) {
         newRoom.players[0].timeline = [startCard];
@@ -262,8 +272,8 @@ const handleStandardRoomCreation = (
   roomsData: Record<string, Room>,
 ) => {
   const maxMistakes = data.maxMistakes !== undefined ? data.maxMistakes : null;
-  const songLibrary = data.songLibrary ?? 'hu';
-  const songs = songLibrary === 'en' ? englishSongs : hungarianSongs;
+  const songLibrary = data.songLibrary ?? "hu";
+  const songs = songLibrary === "en" ? englishSongs : hungarianSongs;
 
   const newRoom: Room = {
     players: [createPlayerObject(socket.id, data.userName)],
@@ -288,7 +298,10 @@ const handleStandardRoomCreation = (
       newRoom.targetLength + 1,
     );
     newRoom.players[0].personalDeck = pDeck;
-    const startCard = newRoom.players[0].personalDeck.pop();
+    const rawStartCard = newRoom.players[0].personalDeck.pop();
+    const startCard = rawStartCard
+      ? { ...rawStartCard, isStartCard: true }
+      : undefined;
     if (startCard) newRoom.players[0].timeline = [startCard];
 
     socket.emit("game_started", {
@@ -475,7 +488,7 @@ export const registerRoomHandlers = (
       targetLength?: number;
       syncMusic?: boolean;
       maxMistakes?: number | null;
-      songLibrary?: 'hu' | 'en';
+      songLibrary?: "hu" | "en";
     }) => {
       const room = roomsData[data.roomCode];
       if (!room) return;
@@ -512,7 +525,7 @@ export const registerRoomHandlers = (
         room.maxMistakes = data.maxMistakes;
       }
       if (data.songLibrary !== undefined) {
-        if (data.songLibrary !== 'hu' && data.songLibrary !== 'en') {
+        if (data.songLibrary !== "hu" && data.songLibrary !== "en") {
           socket.emit("error", "Érvénytelen dalkönyvtár!");
           return;
         }
@@ -543,7 +556,7 @@ export const registerRoomHandlers = (
       return;
     }
 
-    const songs = room.songLibrary === 'en' ? englishSongs : hungarianSongs;
+    const songs = room.songLibrary === "en" ? englishSongs : hungarianSongs;
 
     room.gameStarted = true;
     room.turnIndex = 0;
@@ -552,9 +565,15 @@ export const registerRoomHandlers = (
 
     // Every player gets a deck
     room.players.forEach((player) => {
-      const pDeck = generatePersonalDeck(songs as Song[], room.targetLength + 1);
+      const pDeck = generatePersonalDeck(
+        songs as Song[],
+        room.targetLength + 1,
+      );
       player.personalDeck = pDeck;
-      const startCard = player.personalDeck.pop();
+      const rawStartCard = player.personalDeck.pop();
+      const startCard = rawStartCard
+        ? { ...rawStartCard, isStartCard: true }
+        : undefined;
       if (startCard) {
         player.timeline = [startCard];
       }

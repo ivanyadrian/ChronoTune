@@ -3,7 +3,9 @@ import mongoose from "mongoose";
 export async function connectDB() {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
-    console.error("Hiba: A MONGODB_URI környezeti változó nincs beállítva a .env fájlban!");
+    console.error(
+      "Hiba: A MONGODB_URI környezeti változó nincs beállítva a .env fájlban!",
+    );
     return;
   }
   try {
@@ -25,6 +27,7 @@ const SongSchema = new mongoose.Schema({
   day: { type: Number, required: true },
   fullDate: { type: String, required: true },
   cover: { type: String, required: true },
+  isStartCard: { type: Boolean, default: false },
 });
 // Weekly Challenge Schema (Stores the selected 20 songs for the week)
 const WeeklyChallengeSchema = new mongoose.Schema({
@@ -43,8 +46,15 @@ const LeaderboardSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 // Create index to sort efficiently by mistakes (asc) and then timeInSeconds (asc)
-LeaderboardSchema.index({ weekIdentifier: 1, correctPlacements: -1, timeInSeconds: 1 });
-export const WeeklyChallenge = mongoose.model("WeeklyChallenge", WeeklyChallengeSchema);
+LeaderboardSchema.index({
+  weekIdentifier: 1,
+  correctPlacements: -1,
+  timeInSeconds: 1,
+});
+export const WeeklyChallenge = mongoose.model(
+  "WeeklyChallenge",
+  WeeklyChallengeSchema,
+);
 export const Leaderboard = mongoose.model("Leaderboard", LeaderboardSchema);
 // Active Weekly Run Schema (Tracks ongoing weekly runs)
 const ActiveWeeklyRunSchema = new mongoose.Schema({
@@ -66,4 +76,7 @@ const ActiveWeeklyRunSchema = new mongoose.Schema({
   attempts: { type: Number, default: 0 },
   elapsedTimeMs: { type: Number, default: 0 },
 });
-export const ActiveWeeklyRun = mongoose.model("ActiveWeeklyRun", ActiveWeeklyRunSchema);
+export const ActiveWeeklyRun = mongoose.model(
+  "ActiveWeeklyRun",
+  ActiveWeeklyRunSchema,
+);

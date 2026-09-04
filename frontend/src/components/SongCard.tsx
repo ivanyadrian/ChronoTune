@@ -38,6 +38,24 @@ export const SongCard = ({
 
   if (!song) return null;
 
+  if (song.isStartCard) {
+    return (
+      <div className="relative flex items-center justify-center h-56 sm:h-76 px-4 sm:px-6">
+        <div
+          className={`z-20 animate-in fade-in zoom-in duration-300 transition-all ${
+            isDimmed ? "grayscale opacity-60 scale-95" : ""
+          }`}
+        >
+          <div className="px-5 py-1 bg-primary rounded-full shadow-[0_0_20px] shadow-primary/60 border border-white/20 whitespace-nowrap">
+            <span className="text-white font-sekuya text-sm sm:text-xl text-center justify-center flex">
+              {song.year}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex flex-col items-center group">
       {/* 1. PURPLE BUBBLE (YEAR / QUESTION MARKS) */}

@@ -8,6 +8,7 @@ export interface Song {
   fullDate: string;
   deezerId: string;
   cover: string;
+  isStartCard?: boolean;
 }
 
 export interface Player {
@@ -68,7 +69,7 @@ export interface RoomConfigData {
   targetLength: number;
   maxMistakes: number | null;
   syncMusic: boolean;
-  songLibrary?: 'hu' | 'en';
+  songLibrary?: "hu" | "en";
 }
 
 export * from "./game";

@@ -1,12 +1,25 @@
 import { useState, useEffect } from "react";
-import { AudioLines, MoveRight, User, HelpCircle, Music, Sparkles } from "lucide-react";
+import {
+  AudioLines,
+  MoveRight,
+  User,
+  HelpCircle,
+  Music,
+  Sparkles,
+  ExternalLink,
+} from "lucide-react";
 import { Badge } from "../../../components/ui/Badge";
 import { StatItem } from "../components/StatItem";
 import { Divider } from "../components/Divider";
 import { LanguageSwitcher } from "../../../components/LanguageSwitcher";
 import { useLanguage } from "../../../context/LanguageContext";
 import { InfoModal } from "../../../components/ui/InfoModal";
-import { STORAGE_KEYS, isTutorialHidden, setTutorialHidden } from "../../../utils/storageUtils";
+import { PrivacyModal } from "../../../components/ui/PrivacyModal";
+import {
+  STORAGE_KEYS,
+  isTutorialHidden,
+  setTutorialHidden,
+} from "../../../utils/storageUtils";
 
 interface NameStepProps {
   userName: string;
@@ -17,6 +30,7 @@ interface NameStepProps {
 export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
   const { t } = useLanguage();
   const [showInfo, setShowInfo] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   useEffect(() => {
     if (!isTutorialHidden(STORAGE_KEYS.TUTORIAL_NAME)) {
@@ -44,7 +58,10 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
           <LanguageSwitcher />
         </div>
 
-        <AudioLines size={64} className="text-secondary-light bg-white/5 rounded-full p-4 w-16 h-16 sm:w-20 sm:h-20" />
+        <AudioLines
+          size={64}
+          className="text-secondary-light bg-white/5 rounded-full p-4 w-16 h-16 sm:w-20 sm:h-20"
+        />
         <Badge text="Musical Timeline Challenge" />
 
         <div className="space-y-4 text-center">
@@ -62,7 +79,10 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
         <div className="flex flex-col gap-[clamp(1rem,3vw,1.5rem)] w-full max-w-md mx-auto">
           <div className="flex items-center p-[clamp(0.25rem,1vw,0.2rem)] bg-black/40 border border-white/10 focus-within:border-secondary/50 rounded-[clamp(1rem,2vw,1.5rem)] focus-within:ring-4 focus-within:ring-secondary/5 transition-all group">
             <div className="pl-[clamp(0.75rem,2vw,1.25rem)] text-slate-500 group-focus-within:text-secondary-light transition-colors">
-              <User size={20} className="w-[clamp(1.1rem,2vw,1.25rem)] h-auto" />
+              <User
+                size={20}
+                className="w-[clamp(1.1rem,2vw,1.25rem)] h-auto"
+              />
             </div>
             <input
               type="text"
@@ -90,13 +110,33 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
               active:translate-y-0.5 active:scale-[0.98] transition-all duration-300"
           >
             <span>{t.next}</span>
-            <MoveRight size={22} className="w-[clamp(1.1rem,2vw,1.4rem)]" strokeWidth={3} />
+            <MoveRight
+              size={22}
+              className="w-[clamp(1.1rem,2vw,1.4rem)]"
+              strokeWidth={3}
+            />
           </button>
         </div>
 
-        <p className="text-fluid-badge mt-[clamp(0.5rem,2vw,1rem)] text-slate-600 italic text-center mx-auto">
-          {t.noRegNeeded}
-        </p>
+        <div className="flex flex-col items-center gap-2 pt-1">
+          <p className="text-fluid-badge text-slate-500/80 italic text-center mx-auto">
+            {t.noRegNeeded}
+          </p>
+
+          <button
+            onClick={() => setShowPrivacy(true)}
+            className="group inline-flex items-center gap-1.5 text-slate-400 hover:text-secondary-light transition-all duration-200 py-1 px-3 rounded-full hover:bg-white/5 active:scale-95 cursor-pointer"
+          >
+            <span className="font-archivo tracking-widest uppercase text-[10px] sm:text-[11px] opacity-80 group-hover:opacity-100 transition-opacity">
+              {t.privacyAndStorage}
+            </span>
+            <ExternalLink
+              size={12}
+              className="text-secondary-light/60 group-hover:text-secondary-light transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </button>
+        </div>
+
       </div>
 
       {/* Statistics bar */}
@@ -106,15 +146,19 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-y-6 gap-x-10 w-full">
           <StatItem value={t.statItem_1} label={t.statItem_1_desc} />
-          <div className="hidden md:block"><Divider /></div>
+          <div className="hidden md:block">
+            <Divider />
+          </div>
           <StatItem value={t.statItem_2} label={t.statItem_2_desc} />
-          <div className="hidden md:block"><Divider /></div>
+          <div className="hidden md:block">
+            <Divider />
+          </div>
           <div className="flex justify-center min-w-30">
             <StatItem value={t.statItem_3} label={t.statItem_3_desc} />
           </div>
         </div>
       </div>
-
+     
       <InfoModal
         isOpen={showInfo}
         onClose={handleCloseInfo}
@@ -134,6 +178,11 @@ export const NameStep = ({ userName, setUserName, onNext }: NameStepProps) => {
             description: t.tutorialNameItem3Desc,
           },
         ]}
+      />
+
+      <PrivacyModal
+        isOpen={showPrivacy}
+        onClose={() => setShowPrivacy(false)}
       />
     </div>
   );
