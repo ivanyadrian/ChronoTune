@@ -21,7 +21,7 @@
 
 ## A projekt célja & bemutatása
 
-A **ChronoTune** egy teljes veremű (full-stack), valós idejű webalkalmazás, amely bemutatja a modern webes technológiák gyakorlati alkalmazását, a skálázható architektúratervezést és a valós idejű állapotkezelést.
+A **ChronoTune** egy full-stack, valós idejű webalkalmazás, amely bemutatja a modern webes technológiák gyakorlati alkalmazását, a skálázható architektúratervezést és a valós idejű állapotkezelést.
 
 A játékot a nagy sikerű **Hitster** kártyajáték inspirálta: a játékosok belehallgatnak a zenékbe, és a feladatuk az, hogy kronológiai sorrendbe rendezzék a dalokat a saját idővonalukon (timeline), anélkül, hogy előre látnák a megjelenési évet. A projekt egyesíti az élő audió streaminget, a szoba-alapú valós idejű multiplayer szinkronizációt, valamint egy ütemezett, csalásbiztos heti kihívást globális ranglétrával.
 
