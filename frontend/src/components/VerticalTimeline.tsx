@@ -52,7 +52,7 @@ export const VerticalTimeline = ({
               {/* Item Card */}
               {song.isStartCard ? (
                 <div className="flex items-center py-2">
-                  <div className="px-5 py-1 bg-primary rounded-full shadow-[0_0_20px] shadow-primary/60 border border-white/20 whitespace-nowrap">
+                  <div className="w-full py-1 bg-primary rounded-full shadow-[0_0_20px] shadow-primary/60 border border-white/20 whitespace-nowrap">
                     <span className="text-white font-sekuya text-sm sm:text-base text-center justify-center flex">
                       {song.year}
                     </span>
